@@ -60,7 +60,7 @@ public class SceneChanger : MonoBehaviour
         {
             settingPopup.SetActive(true); // 설정창 켜기
         }
-    }
+}
 
     /// <summary>
     /// 3. 설정 팝업창 닫기
