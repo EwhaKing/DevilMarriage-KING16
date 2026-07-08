@@ -1531,8 +1531,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AutoModeController
   dialogueRunner: {fileID: 2085967837}
+  lineTypingStatusSource: {fileID: 0}
+  fallbackTypingWaitTime: 1
+  typingCheckInterval: 0.05
   optionsPresenter: {fileID: 2146078463}
   stopWhenOptionsShown: 0
+  blockingPanels:
+  - {fileID: 1615965518}
+  - {fileID: 444980935}
   readDelay: 2
   nextLineDelay: 0.2
 --- !u!1 &1100216879
@@ -1597,6 +1603,7 @@ GameObject:
   - component: {fileID: 1180626465}
   - component: {fileID: 1180626464}
   - component: {fileID: 1180626463}
+  - component: {fileID: 1180626466}
   m_Layer: 5
   m_Name: SkipButton
   m_TagString: Untagged
@@ -1705,6 +1712,31 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1180626461}
   m_CullTransparentMesh: 1
+--- !u!114 &1180626466
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1180626461}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 773c701df361fcc439af5fbf5828f6ed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SkipModeController
+  dialogueRunner: {fileID: 2085967837}
+  skipButton: {fileID: 1180626463}
+  skipButtonImage: {fileID: 1180626464}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  pressedColor: {r: 1, g: 0, b: 0, a: 1}
+  flashDuration: 0.15
+  optionsPresenter: {fileID: 2146078463}
+  playerControlObjects:
+  - {fileID: 444980935}
+  - {fileID: 1615965518}
+  requestInterval: 0.03
+  maxSkipRequestCount: 300
+  autoModeController: {fileID: 0}
 --- !u!1 &1207703249
 GameObject:
   m_ObjectHideFlags: 0
