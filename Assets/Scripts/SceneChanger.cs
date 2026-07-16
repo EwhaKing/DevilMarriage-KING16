@@ -1,111 +1,235 @@
 using System;
+
 using System.Collections.Generic;
+
 using UnityEngine;
+
 using UnityEngine.SceneManagement;
+
 using UnityEngine.UI;
-using Yarn.Unity;
+
+
+
+/// <summary>
+
+/// 씬 이동과 설정 팝업, 캐릭터 표정 스프라이트를 담당합니다.
+
+/// (이전 Yarn 명령어 등록은 제거하고 ScriptableObject 대화 시스템과 함께 씁니다.)
+
+/// </summary>
 
 public class SceneChanger : MonoBehaviour
+
 {
-    [Header("설정 팝업 UI 오브젝트")]
+
+    [Header("Settings Popup")]
+
     [SerializeField] private GameObject settingPopup;
 
-    public DialogueRunner dialogueRunner;
+
 
     [Header("Dialogue Portrait")]
+
     [SerializeField] private Image characterPortrait;
+
     [SerializeField] private Sprite portraitDefault;
+
     [SerializeField] private Sprite portraitHappy;
+
     [SerializeField] private Sprite portraitNervous;
+
+
 
     private Dictionary<string, Sprite> portraitSprites;
 
+
+
+    /// <summary>기본 표정 스프라이트</summary>
+
+    public Sprite PortraitDefault => portraitDefault;
+
+    /// <summary>기쁜 표정 스프라이트</summary>
+
+    public Sprite PortraitHappy => portraitHappy;
+
+    /// <summary>긴장 표정 스프라이트</summary>
+
+    public Sprite PortraitNervous => portraitNervous;
+
+    /// <summary>캐릭터 Image (기존 UI)</summary>
+
+    public Image CharacterPortrait => characterPortrait;
+
+    /// <summary>설정 팝업 오브젝트</summary>
+
+    public GameObject SettingPopup => settingPopup;
+
+
+
     private void Awake()
+
     {
+
         portraitSprites = new Dictionary<string, Sprite>(StringComparer.OrdinalIgnoreCase);
 
+
+
         if (portraitDefault != null)
+
             portraitSprites["default"] = portraitDefault;
+
         if (portraitHappy != null)
+
             portraitSprites["happy"] = portraitHappy;
+
         if (portraitNervous != null)
+
             portraitSprites["nervous"] = portraitNervous;
+
+
+
+        // DialogueManager가 있으면 표정 스프라이트를 넘겨 줍니다.
+
+        var dialogueManager = FindAnyObjectByType<DialogueManager>();
+
+        if (dialogueManager != null)
+
+            dialogueManager.SetPortraitSprites(portraitDefault, portraitHappy, portraitNervous);
+
     }
 
-    private void Start()
-    {
-        if (dialogueRunner == null)
-            return;
 
-        dialogueRunner.AddCommandHandler<string>("LoadScene", ChangeSceneByName);
-        dialogueRunner.AddCommandHandler<string>("SetExpression", SetCharacterExpression);
-    }
 
     public void GoToTitleScreen()
+
     {
-        ChangeSceneByName("TitleScene");
+
+        ChangeSceneByName(SceneNames.Title);
+
     }
+
+
+
+    public void GoToPrologue()
+    {
+        GameFlowManager.EnsureExists();
+        ChangeSceneByName(SceneNames.Prologue);
+    }
+
+    public void GoToStageSelect()
+    {
+        GameFlowManager.EnsureExists();
+        ChangeSceneByName(SceneNames.StageSelect);
+    }
+
+
 
     public void GoToStage1()
+
     {
+
         ChangeSceneByName("Stage1Scene");
+
     }
 
-    /// <summary>
-    /// 2. 설정 팝업창 열기
-    /// </summary>
+
+
+    public void GoToCurrentStagePlay()
+
+    {
+
+        if (GameFlowManager.Instance != null)
+
+            ChangeSceneByName(GameFlowManager.Instance.GetCurrentStagePlaySceneName());
+
+        else
+
+            ChangeSceneByName(SceneNames.StagePlay);
+
+    }
+
+
+
     public void OpenSettingsPopup()
+
     {
+
         if (settingPopup != null)
-        {
-            settingPopup.SetActive(true); // 설정창 켜기
-        }
+
+            settingPopup.SetActive(true);
+
     }
 
-    /// <summary>
-    /// 3. 설정 팝업창 닫기
-    /// </summary>
+
+
     public void CloseSettingsPopup()
+
     {
+
         if (settingPopup != null)
-        {
-            settingPopup.SetActive(false); // 설정창 끄기
-        }
+
+            settingPopup.SetActive(false);
+
     }
+
+
+
+    public void ClickExitGame()
+
+    {
+
+#if UNITY_EDITOR
+
+        UnityEditor.EditorApplication.isPlaying = false;
+
+#else
+
+        Application.Quit();
+
+#endif
+
+    }
+
+
+
+    public void ChangeSceneByName(string sceneName)
+
+    {
+
+        Debug.Log($"Load scene: {sceneName}");
+
+        SceneManager.LoadScene(sceneName);
+
+    }
+
+
 
     /// <summary>
-    /// 4. 게임 종료
-    /// </summary>
-    public void ClickExitGame()
-    {
-#if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;
-#else
-        Application.Quit();
-#endif
-    }
 
-    // 얀 스크립트에서 <<LoadScene 씬이름>> 을 호출하면 이름으로 씬 이동
-    public void ChangeSceneByName(string sceneName)
-    {
-        Debug.Log($"얀 스크립트 명령: {sceneName} 씬으로 이동합니다.");
-        SceneManager.LoadScene(sceneName);
-    }
+    /// expressionId에 맞는 표정으로 캐릭터 Image를 바꿉니다.
+
+    /// </summary>
 
     public void SetCharacterExpression(string expressionId)
+
     {
+
         if (characterPortrait == null)
-        {
-            Debug.LogWarning("[SceneChanger] Character Portrait Image가 연결되지 않았습니다.");
+
             return;
-        }
+
+
 
         if (!portraitSprites.TryGetValue(expressionId, out var sprite))
-        {
-            Debug.LogWarning($"[SceneChanger] 알 수 없는 표정: {expressionId}");
+
             return;
-        }
+
+
 
         characterPortrait.sprite = sprite;
+
     }
+
 }
+
+

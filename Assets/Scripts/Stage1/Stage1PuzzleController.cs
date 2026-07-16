@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -37,6 +38,14 @@ public class Stage1PuzzleController : MonoBehaviour
     [SerializeField] private string stageClearSceneName = "StageClearScene";
     [SerializeField] private float clearDelay = 0.5f;
 
+    public bool UseGameFlowManager { get; set; }
+    public bool InputLocked { get; set; }
+    public bool AwaitingStartSelection { get; set; }
+    public int CurrentRuneIndex => _currentRuneIndex;
+
+    public event Action<RuneNode> OnRuneClicked;
+    public event Action OnForwardMoveCompleted;
+
     private readonly Dictionary<long, RunePathEdge> _edgeLookup = new();
     private readonly List<int> _visitHistory = new();
     private int _currentRuneIndex = -1;
@@ -50,7 +59,7 @@ public class Stage1PuzzleController : MonoBehaviour
     private void Awake()
     {
         if (resourceManager == null)
-            resourceManager = StageResourceManager.Instance ?? FindFirstObjectByType<StageResourceManager>();
+            resourceManager = StageResourceManager.Instance ?? FindAnyObjectByType<StageResourceManager>();
 
         if (runes == null || runes.Length == 0)
             runes = GetComponentsInChildren<RuneNode>();
@@ -104,13 +113,61 @@ public class Stage1PuzzleController : MonoBehaviour
         _visitHistory.Add(_startRuneIndex);
         _lastRuneIndex = -1;
         _lastMoveWasForward = false;
+        _isMoving = false;
+        _stageCleared = false;
+        InputLocked = false;
 
         if (player != null && startRune != null)
             player.position = startRune.WorldPosition;
     }
 
+    /// <summary>
+    /// 실패 후 같은 StagePlayScene 안에서 퍼즐을 처음부터 다시 시작합니다.
+    /// </summary>
+    public void RestartStage()
+    {
+        StopAllCoroutines();
+        InitializeStage();
+    }
+
+    public void HandleRuneClicked(RuneNode target)
+    {
+        OnRuneClicked?.Invoke(target);
+
+        if (AwaitingStartSelection)
+            return;
+
+        if (InputLocked || target == null)
+            return;
+
+        TryMoveToRune(target);
+    }
+
+    public void SelectStartRune(RuneNode startRune)
+    {
+        if (startRune == null)
+            return;
+
+        _startRuneIndex = startRune.RuneIndex;
+        _currentRuneIndex = _startRuneIndex;
+        _visitHistory.Clear();
+        _visitHistory.Add(_startRuneIndex);
+        _lastRuneIndex = -1;
+        _lastMoveWasForward = false;
+        _stageCleared = false;
+
+        foreach (var edge in pathEdges)
+            edge.SetTraversed(false);
+
+        if (player != null)
+            player.position = startRune.WorldPosition;
+    }
+
     public bool TryMoveToRune(RuneNode target)
     {
+        if (InputLocked || AwaitingStartSelection)
+            return false;
+
         if (CanBacktrackTo(target))
             return TryBacktrackTo(target);
 
@@ -257,6 +314,7 @@ public class Stage1PuzzleController : MonoBehaviour
         _lastMoveWasForward = true;
         edge.SetTraversed(true);
         _isMoving = false;
+        OnForwardMoveCompleted?.Invoke();
 
         if (CheckStageClear())
             StartCoroutine(LoadClearSceneAfterDelay());
@@ -358,7 +416,15 @@ public class Stage1PuzzleController : MonoBehaviour
     {
         _stageCleared = true;
         yield return new WaitForSeconds(clearDelay);
-        SceneManager.LoadScene(stageClearSceneName);
+
+        if (UseGameFlowManager && GameFlowManager.Instance != null)
+        {
+            GameFlowManager.Instance.OnStagePlayCleared();
+            yield break;
+        }
+
+        if (!string.IsNullOrEmpty(stageClearSceneName))
+            SceneManager.LoadScene(stageClearSceneName);
     }
 
     private RuneNode GetRune(int index)

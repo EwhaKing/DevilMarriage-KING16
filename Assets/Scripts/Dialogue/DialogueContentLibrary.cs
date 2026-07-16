@@ -1,0 +1,232 @@
+using System.Collections.Generic;
+using UnityEngine;
+
+/// <summary>
+/// Yarn에서 이전한 기본 대사를 코드로 보관합니다.
+/// ScriptableObject 에셋이 아직 없어도 게임이 바로 동작하도록 폴백으로 씁니다.
+/// (에셋은 DevilMarriage → Create Dialogue Data 메뉴로 만드는 것을 권장합니다.)
+/// </summary>
+public static class DialogueContentLibrary
+{
+    /// <summary>프롤로그 나레이션 + 방 장면 데이터를 런타임에 만듭니다.</summary>
+    public static PrologueDialogueData CreatePrologueRuntime()
+    {
+        var data = ScriptableObject.CreateInstance<PrologueDialogueData>();
+        data.narrationLines = BuildPrologueNarration();
+        data.roomLines = BuildPrologueRoom();
+        return data;
+    }
+
+    /// <summary>스테이지 번호에 맞는 Open/Close 대사를 런타임에 만듭니다.</summary>
+    public static StageDialogueData CreateStageRuntime(int stageNumber)
+    {
+        var data = ScriptableObject.CreateInstance<StageDialogueData>();
+        data.stageNumber = stageNumber;
+
+        switch (stageNumber)
+        {
+            case 1:
+                data.openLines = BuildStage01Open();
+                data.closeLines = BuildStage01Close();
+                break;
+            case 2:
+                data.openLines = BuildStage02Open();
+                data.closeLines = BuildStage02Close();
+                break;
+            case 3:
+                data.openLines = BuildStage03Open();
+                data.closeLines = BuildStage03Close();
+                break;
+            default:
+                data.openLines = new List<DialogueLine>
+                {
+                    Line("주인공", $"[임시] 스테이지 {stageNumber} 오프닝 대사입니다.")
+                };
+                data.closeLines = new List<DialogueLine>
+                {
+                    Line("주인공", $"[임시] 스테이지 {stageNumber} 클리어 대사입니다.", "happy")
+                };
+                break;
+        }
+
+        return data;
+    }
+
+    public static DialogueLine Line(string speaker, string text, string expression = "default", string eventId = "")
+    {
+        return new DialogueLine
+        {
+            speakerName = speaker,
+            dialogueText = text,
+            expressionId = expression,
+            characterPosition = CharacterPosition.Center,
+            eventId = eventId
+        };
+    }
+
+    public static DialogueLine EventOnly(string eventId)
+    {
+        return new DialogueLine
+        {
+            speakerName = "",
+            dialogueText = "",
+            expressionId = "default",
+            eventId = eventId
+        };
+    }
+
+    public static List<DialogueLine> BuildPrologueNarration()
+    {
+        return new List<DialogueLine>
+        {
+            Line("나레이션", "아주 먼 옛날, 인간들은 풍요로운 땅 위에서 서로를 도우며 평화롭게 살아가고 있었다. 자연은 풍요로움이 가득했고, 마을은 웃음소리가 끊이질 않았다."),
+            Line("나레이션", "그러던 어느 날, 정체불명의 뿔 달린 존재들이 나타났다. 그들은 인간을 유혹하고 마음의 약한 틈을 파고들어 인간을 뿌리까지 타락시켰다."),
+            Line("나레이션", "타락한 인간들은 서로를 미워하고 의심하며 불행해졌다. 그리고 그 사악한 존재들은 인간들의 불행을 지켜보며 기뻐했다."),
+            Line("나레이션", "이 해악을 지켜본 인간들의 국왕은 그들을 \"악마\"라고 이름 붙이고 악마들에게 맞서기 위해 새로운 힘을 개발했다."),
+            Line("나레이션", "그것이 바로 마법이었다."),
+            Line("나레이션", "국왕은 마법을 전문적으로 배우고 다루는 자들을 양성하기 시작했고, 사람들은 그들을 마법사라 불렀다."),
+            Line("나레이션", "마법사들은 힘을 모아 악마들을 인간계에서 몰아냈고, 그들이 다시는 돌아오지 못하도록 마계라는 닫힌 세계로 추방했다."),
+            Line("나레이션", "그 후, 마법은 인간의 삶에 깊이 스며들었다. 비를 내리게 하거나 건물을 세우는 거대한 마법부터, 옷 얼룩을 지우거나 탈모를 치료하는 생활 마법까지 다양하게 쓰이게 되었다."),
+            Line("나레이션", "마법은 학교에서 가르치는 필수 학문이 되었고, 곧 마법사는 이 시대에서 가장 추앙받는 직업이 되었다."),
+            Line("나레이션", "그렇게 세상은 다시 평화를 되찾은 듯했다. 악마의 이름은 점차 오래된 역사 속 이야기로만 남았고, 사람들은 자신들이 누리는 평화가 영원히 이어질 것이라 믿었다."),
+            Line("나레이션", "하지만 최근, 마계와 인간계를 가르는 차원의 결계에 미세한 균열이 생기기 시작했다. 오래전 악마들을 봉인한 이후 단 한 번도 흔들린 적 없던 결계였다."),
+            Line("나레이션", "국왕은 이것이 단순한 이상 현상이 아니라고 판단했고, 마법사들에게 즉시 조사를 명했다. 그리고 조사 끝에, 한 마족이 기존의 마왕을 쓰러뜨리고, 새로운 마왕의 자리에 오른 사실이 밝혀졌다."),
+            Line("나레이션", "그 마왕은 이전의 마왕들과 달랐다. 그는 마족들을 다시 인간계로 이끌려 했고, 마계 안에서도 점점 강대한 세력을 키워가고 있었다."),
+            Line("나레이션", "그리고 새로운 마왕의 이름이 전역에 퍼질수록, 함께 속삭여지는 또 하나의 이름이 있었다. 새로운 마왕의 곁에 나란히 설 수 있었던 오로지 단 하나의 존재, 그의 신부."),
+            Line("나레이션", "신부의 이름을 지어주세요."),
+            EventOnly("RequestPlayerName"),
+            Line("나레이션", "그 신부의 이름은 [주인공]. 세상 누구보다 아름답고 총명하며 기품 있는 존재였다고 전해진다."),
+            Line("나레이션", "신부를 본 자들은 모두 입을 모아 칭찬했다. 이토록 빛나는 사람은 처음이야. 마왕이 직접 선택할 만하군. 가장 특별한 신부다."),
+            Line("나레이션", "신부는 세상 누구보다 아름답고 총명하며 기품 있는 존재였다고 전해진다. 너무나 눈부신 나머지, 신부가 지나간 자리의 촛불들은 제 할 일을 잃고 조용히 꺼졌으며, 거울조차 감히 그 모습을 비추는 영광에 떨었다.",
+                eventId: "AcceleratePraise"),
+            Line("나레이션", "신부는 모두의 시선을 한몸에 받았다. 모두가 신부를 사랑했다. 아무튼 신부는 상당히 예쁘고 멋지고 아름답고 개쩔고 미치고 대단하고 멋진 존재였다",
+                eventId: "AcceleratePraiseThenFade"),
+        };
+    }
+
+    public static List<DialogueLine> BuildPrologueRoom()
+    {
+        return new List<DialogueLine>
+        {
+            Line("엄마", "[주인공]!!!! 너 언제까지 자고 있을래!!!"),
+            Line("주인공", "……!"),
+            Line("엄마", "해가 중천에 떴어!!! 쪽팔려 죽겠네, 정말! 엄마 친구들은 다 자식이 마법사 시험에 붙었다, 정식으로 마법사가 됐다, 난리인데! 너는 대체 언제까지 방에만 처박혀 있을 거야?!"),
+            Line("주인공", "크, 크윽……"),
+            Line("주인공", "엄마는 진짜……"),
+            Line("엄마", "마법사까지는 바라지도 않아! 밖에 나가서 사람 구실이라도 좀 하라고!"),
+            Line("주인공", "사람... 구실……"),
+            Line("주인공", "……엄마 말이... 맞아"),
+            Line("주인공", "나는 사회의 낙오자나 다름없으니까……"),
+            Line("주인공", "성적은 하나같이 바닥을 기어서 마법학교도 낙제했고... 말솜씨도 최악이라 사람들은 나와 대화하는 것조차 피했지."),
+            Line("주인공", "이젠 밖에 나가는 것조차 두려워졌어……"),
+            Line("주인공", "그래. 난 그냥... 사람으로서 완전히 실패한 인생인거야……"),
+            Line("주인공", "……"),
+            Line("주인공", "아니, 아니지."),
+            Line("주인공", "생각해보면 나도 할 만큼 했어."),
+            Line("주인공", "나도 최선을 다했다고!"),
+            Line("주인공", "마법학교에 들어가려고 밤새 책도 붙잡아봤고, 사람들한테 잘 보이려고 먼저 말도 걸어봤고, 어떻게든 평범하게 살아보려고 노력했어!"),
+            Line("주인공", "그런데도 결국 이렇게 방구석 백수 신세면……"),
+            Line("주인공", "이건 내가 부족해서가 아니라, 세상이 불공평한 거잖아."),
+            Line("주인공", "결국 성공하는 건 돈 많은 녀석들, 재능 있는 녀석들, 부모 잘 만나서 처음부터 운 좋게 태어난 녀석들뿐이었잖아!"),
+            Line("주인공", "그런 녀석들은 남의 자리를 빼앗고, 남의 노력을 비웃고, 나같이 약한 사람을 아무렇지 않게 밀어내면서 위로 올라가지."),
+            Line("주인공", "착하게 살아봤자 아무도 알아주지 않고, 결국 남을 밟고 올라서는 쪽이 더 잘되는 세상이라면……"),
+            Line("주인공", "……잠깐."),
+            Line("주인공", "그렇다면 악이야말로 사실 이 세계를 움직이는 진짜 힘 아니야?", "happy"),
+            Line("주인공", "만약 이 세상이 정말 악한 쪽이 이기는 곳이라면……", "happy"),
+            Line("주인공", "가장 강하고, 가장 두렵고, 가장 끔찍한 존재.", "happy"),
+            Line("주인공", "악의 정점에 선 존재.", "happy"),
+            Line("주인공", "\"마왕\"이야말로 이 세상의 정상에 있는 거잖아……", "happy"),
+            Line("주인공", "악…… 마계…… 마왕……", "happy"),
+            Line("주인공", "그리고…… 신부.", "happy"),
+            Line("주인공", "그래... 만약 인간계에서, 이 세상에서 아무도 날 필요로 하지 않는다면……", "happy"),
+            Line("주인공", "마계에서 마왕의 신부로 인정받으면 돼!", "happy"),
+            Line("주인공", "기다려라, 마왕.", "happy"),
+            Line("주인공", "이 몸이…… 곧 너에게 청혼하러 간다!", "happy"),
+            EventOnly("GoToStageSelect"),
+        };
+    }
+
+    public static List<DialogueLine> BuildStage01Open()
+    {
+        return new List<DialogueLine>
+        {
+            Line("주인공", "좋아…… 드디어 때가 왔다. 오늘부터 내 인생은 완전히 달라질 거야."),
+            Line("주인공", "마법사로 성공하지 못한다면…… 마왕의 배우자로 성공하면 된다."),
+            Line("주인공", "정말 완벽한 계획이야. 너무 완벽해서 내 자신이 무서울 지경인데...?"),
+            Line("주인공", "그러니까 우선…… 악마인 마왕을 만나야겠지?"),
+            Line("주인공", "……근데 악마는 어떻게 볼 수 있는 거더라?"),
+            Line("주인공", "음…… 보통 이런 건 마법진 같은 걸 그려서 소환하면 되는 거 아닌가? 만화에서도 다 그렇게 하던데."),
+            Line("주인공", "일단 동그라미를 그리고…… 뭔가 있어 보이는 점들을 찍고…… 그 점들을 전부 이어주면…… 대충 소환진처럼 보이겠지."),
+            Line("주인공", "색은 당연히 붉은색이어야겠지? 악마 소환인데 파란색이면 좀 성의 없어 보이잖아."),
+            Line("주인공", "좋아. 엄마방 서랍에 있는 빨간색 립스틱을 잠깐만 빌리자. 잠깐만. 정말 잠깐만."),
+        };
+    }
+
+    public static List<DialogueLine> BuildStage01Close()
+    {
+        return new List<DialogueLine>
+        {
+            Line("주인공", "좋았어... 마지막으로 이 점만 이어주면……"),
+            Line("주인공", "됐다……! 마법진 완성!!", "happy"),
+            Line("주인공", "마왕님께 보내는 첫인상인데, 너무 대충 그린 것처럼 보이면 안 되니까…… 내가 초등학교 때부터 아껴 쓰던 줄자까지 꺼내서 나름 정성스럽게 그리긴 했는데……"),
+            Line("주인공", "아니, 근데 생각해보면 마왕도 바쁘실 텐데, 너무 복잡한 소환진보다는 이렇게 간단한 쪽이 오히려 보기 편하지 않을까?"),
+            Line("주인공", "그래. 미니멀리즘. 요즘 대세는 미니멀리즘이지."),
+            Line("주인공", "이건 대충 그린 게 아니라, 미니멀리즘 소환진이야."),
+            Line("주인공", "좋아. 이제 마왕만 나와서 내가 청혼하면 되는 거야."),
+            Line("주인공", "후…… 침착하자. 곧 내 인생의 전환점이 시작된다."),
+            Line("주인공", "나와라, 마왕! 그리고 내 신랑이 되어라!", "happy"),
+            Line("주인공", "……"),
+            Line("주인공", "…………"),
+            Line("주인공", "………………"),
+            Line("주인공", "아, 아무 일도 안 일어나네."),
+            Line("주인공", "아…… 그렇지…… 이런 걸로 될 리가 없나."),
+            Line("주인공", "뭐가 문제였지? 점이 너무 적었나? 립스틱 색깔이 마왕 취향이 아닌가?"),
+            Line("주인공", "음…… 어떻게 하면 좋지?"),
+            Line("주인공", "일단 제대로 된 정보를 찾아봐야겠어."),
+            Line("주인공", "도서관에 가면 뭐라도 있으려나? 마법진 입문서라든가, 초보자를 위한 악마 소환 같은 책이라든가……"),
+            Line("엄마", "[주인공]아! 내 빨간색 립스틱 봤니?"),
+            Line("주인공", "윽.", "nervous"),
+            Line("엄마", "분명 서랍에 뒀는데 어디 갔지? 지금 써야 하는데!"),
+            Line("주인공", "큰일 났다. 엄마한테 이 방 꼴을 들키면 악마보다 엄마가 먼저 날 마계로 보내버릴 거야.", "nervous"),
+            Line("주인공", "일단 오늘은 여기까지. 내일 도서관에 가서 제대로 된 소환 방법을 찾아보자."),
+            Line("주인공", "기다려라, 마왕…… 오늘은 실패했지만, 이건 어디까지나 시행착오일 뿐이니까."),
+            Line("주인공", "나와 결혼할 그 날만을 앞두고 있으라고...!", "happy"),
+        };
+    }
+
+    public static List<DialogueLine> BuildStage02Open()
+    {
+        return new List<DialogueLine>
+        {
+            Line("주인공", "[임시] 스테이지 2 오프닝 대사입니다."),
+            Line("주인공", "두 번째 의식... 이번에도 실수하면 안 돼..."),
+        };
+    }
+
+    public static List<DialogueLine> BuildStage02Close()
+    {
+        return new List<DialogueLine>
+        {
+            Line("주인공", "[임시] 스테이지 2 클리어 대사입니다.", "happy"),
+            Line("주인공", "...조금씩 익숙해지는 것 같아...", "happy"),
+        };
+    }
+
+    public static List<DialogueLine> BuildStage03Open()
+    {
+        return new List<DialogueLine>
+        {
+            Line("주인공", "[임시] 스테이지 3 오프닝 대사입니다."),
+            Line("주인공", "세 번째 의식... 여기까지 왔으니 끝까지 가야 해..."),
+        };
+    }
+
+    public static List<DialogueLine> BuildStage03Close()
+    {
+        return new List<DialogueLine>
+        {
+            Line("주인공", "[임시] 스테이지 3 클리어 대사입니다.", "happy"),
+            Line("주인공", "...지금까지 구현된 스테이지를 모두 클리어했어.", "happy"),
+        };
+    }
+}

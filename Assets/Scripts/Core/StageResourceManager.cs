@@ -1,9 +1,9 @@
 using System;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 /// <summary>
 /// 스테이지 자원(정신력, 쥐의 피)을 관리한다.
+/// 실패 시 별도 씬으로 이동하지 않고, OnGameOver로 같은 StagePlayScene에서 재도전을 유도한다.
 /// </summary>
 public class StageResourceManager : MonoBehaviour
 {
@@ -17,10 +17,6 @@ public class StageResourceManager : MonoBehaviour
 
     [Header("Rat Blood")]
     [SerializeField] private int maxRatBlood = 15;
-
-    [Header("Game Over")]
-    [SerializeField] private string gameOverSceneName = "GameOverScene";
-    [SerializeField] private float gameOverDelay = 0.5f;
 
     public int MaxSanity => maxSanity;
     public int CurrentSanity { get; private set; }
@@ -60,6 +56,19 @@ public class StageResourceManager : MonoBehaviour
 
         OnSanityChanged?.Invoke(CurrentSanity, maxSanity);
         OnRatBloodChanged?.Invoke(CurrentRatBlood, maxRatBlood);
+    }
+
+    public void ApplyPlayData(StagePlayData playData)
+    {
+        if (playData == null)
+        {
+            ResetResources();
+            return;
+        }
+
+        maxSanity = playData.maxSanity;
+        maxRatBlood = playData.maxRatBlood;
+        ResetResources();
     }
 
     public bool HasRatBlood(int amount = 1)
@@ -123,30 +132,5 @@ public class StageResourceManager : MonoBehaviour
 
         _isGameOver = true;
         OnGameOver?.Invoke();
-        Invoke(nameof(LoadGameOverScene), gameOverDelay);
-    }
-
-    private void LoadGameOverScene()
-    {
-        if (Application.CanStreamedLevelBeLoaded(gameOverSceneName))
-        {
-            SceneManager.LoadScene(gameOverSceneName);
-            return;
-        }
-
-#if UNITY_EDITOR
-        var scenePath = $"Assets/Scenes/{gameOverSceneName}.unity";
-        if (System.IO.File.Exists(scenePath))
-        {
-            UnityEditor.SceneManagement.EditorSceneManager.LoadSceneInPlayMode(
-                scenePath,
-                new LoadSceneParameters(LoadSceneMode.Single));
-            return;
-        }
-#endif
-
-        Debug.LogError(
-            $"[StageResourceManager] '{gameOverSceneName}' 씬을 불러올 수 없습니다. " +
-            "Unity에서 GameOverScene.unity를 연 뒤 Build Profiles → Add Open Scenes를 눌러 등록하세요.");
     }
 }

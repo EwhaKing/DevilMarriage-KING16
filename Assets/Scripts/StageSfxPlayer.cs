@@ -21,7 +21,7 @@ public class StageSfxPlayer : MonoBehaviour
         if (resourceManager == null)
             resourceManager = GetComponent<StageResourceManager>()
                 ?? StageResourceManager.Instance
-                ?? FindFirstObjectByType<StageResourceManager>();
+                ?? FindAnyObjectByType<StageResourceManager>();
 
         _audioSource = gameObject.AddComponent<AudioSource>();
         _audioSource.playOnAwake = false;

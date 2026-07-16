@@ -93,7 +93,7 @@ public class MenuController : MonoBehaviour
         if (settingPopup != null)
             settingPopup.SetActive(false);
 
-        var soundSettings = FindFirstObjectByType<SoundSettings>();
+        var soundSettings = FindAnyObjectByType<SoundSettings>();
         if (soundSettings != null)
             soundSettings.SaveSoundSettings();
     }

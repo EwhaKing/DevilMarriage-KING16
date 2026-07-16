@@ -29,7 +29,7 @@ public class StageHUD : MonoBehaviour
     {
         _resources = StageResourceManager.Instance;
         if (_resources == null)
-            _resources = FindFirstObjectByType<StageResourceManager>();
+            _resources = FindAnyObjectByType<StageResourceManager>();
 
         UpdateStageName();
         UpdateSanityDisplay(_resources != null ? _resources.CurrentSanity : 0,
@@ -57,6 +57,16 @@ public class StageHUD : MonoBehaviour
     {
         if (stageNameText != null)
             stageNameText.text = $"{stageCode} {stageTitle}";
+    }
+
+    public void ApplyPlayData(StagePlayData playData)
+    {
+        if (playData == null)
+            return;
+
+        stageCode = playData.stageCode;
+        stageTitle = playData.stageTitle;
+        UpdateStageName();
     }
 
     private void UpdateSanityDisplay(int current, int max)

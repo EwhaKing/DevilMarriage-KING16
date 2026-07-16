@@ -1,0 +1,255 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1d2e3f4a5b60718293a4b5c6d7e8f03, type: 3}
+  m_Name: Stage01_DialogueData
+  m_EditorClassIdentifier: Assembly-CSharp::StageDialogueData
+  stageNumber: 1
+  openLines:
+  - speakerName: "\uC8FC\uC778\uACF5"
+    dialogueText: "\uC88B\uC544\u2026\u2026\u0020\uB4DC\uB514\uC5B4\u0020\uB54C\uAC00\u0020\uC654\uB2E4\u002E\u0020\uC624\uB298\uBD80\uD130\u0020\uB0B4\u0020\uC778\uC0DD\uC740\u0020\uC644\uC804\uD788\u0020\uB2EC\uB77C\uC9C8\u0020\uAC70\uC57C\u002E"
+    characterSprite: {fileID: 0}
+    expressionId: default
+    characterPosition: 1
+    backgroundImage: {fileID: 0}
+    eventId: 
+  - speakerName: "\uC8FC\uC778\uACF5"
+    dialogueText: "\uB9C8\uBC95\uC0AC\uB85C\u0020\uC131\uACF5\uD558\uC9C0\u0020\uBABB\uD55C\uB2E4\uBA74\u2026\u2026\u0020\uB9C8\uC655\uC758\u0020\uBC30\uC6B0\uC790\uB85C\u0020\uC131\uACF5\uD558\uBA74\u0020\uB41C\uB2E4\u002E"
+    characterSprite: {fileID: 0}
+    expressionId: default
+    characterPosition: 1
+    backgroundImage: {fileID: 0}
+    eventId: 
+  - speakerName: "\uC8FC\uC778\uACF5"
+    dialogueText: "\uC815\uB9D0\u0020\uC644\uBCBD\uD55C\u0020\uACC4\uD68D\uC774\uC57C\u002E\u0020\uB108\uBB34\u0020\uC644\uBCBD\uD574\uC11C\u0020\uB0B4\u0020\uC790\uC2E0\uC774\u0020\uBB34\uC11C\uC6B8\u0020\uC9C0\uACBD\uC778\uB370\u002E\u002E\u002E\u003F"
+    characterSprite: {fileID: 0}
+    expressionId: default
+    characterPosition: 1
+    backgroundImage: {fileID: 0}
+    eventId: 
+  - speakerName: "\uC8FC\uC778\uACF5"
+    dialogueText: "\uADF8\uB7EC\uB2C8\uAE4C\u0020\uC6B0\uC120\u2026\u2026\u0020\uC545\uB9C8\uC778\u0020\uB9C8\uC655\uC744\u0020\uB9CC\uB098\uC57C\uACA0\uC9C0\u003F"
+    characterSprite: {fileID: 0}
+    expressionId: default
+    characterPosition: 1
+    backgroundImage: {fileID: 0}
+    eventId: 
+  - speakerName: "\uC8FC\uC778\uACF5"
+    dialogueText: "\u2026\u2026\uADFC\uB370\u0020\uC545\uB9C8\uB294\u0020\uC5B4\uB5BB\uAC8C\u0020\uBCFC\u0020\uC218\u0020\uC788\uB294\u0020\uAC70\uB354\uB77C\u003F"
+    characterSprite: {fileID: 0}
+    expressionId: default
+    characterPosition: 1
+    backgroundImage: {fileID: 0}
+    eventId: 
+  - speakerName: "\uC8FC\uC778\uACF5"
+    dialogueText: "\uC74C\u2026\u2026\u0020\uBCF4\uD1B5\u0020\uC774\uB7F0\u0020\uAC74\u0020\uB9C8\uBC95\uC9C4\u0020\uAC19\uC740\u0020\uAC78\u0020\uADF8\uB824\uC11C\u0020\uC18C\uD658\uD558\uBA74\u0020\uB418\uB294\u0020\uAC70\u0020\uC544\uB2CC\uAC00\u003F\u0020\uB9CC\uD654\uC5D0\uC11C\uB3C4\u0020\uB2E4\u0020\uADF8\uB807\uAC8C\u0020\uD558\uB358\uB370\u002E"
+    characterSprite: {fileID: 0}
+    expressionId: default
+    characterPosition: 1
+    backgroundImage: {fileID: 0}
+    eventId: 
+  - speakerName: "\uC8FC\uC778\uACF5"
+    dialogueText: "\uC77C\uB2E8\u0020\uB3D9\uADF8\uB77C\uBBF8\uB97C\u0020\uADF8\uB9AC\uACE0\u2026\u2026\u0020\uBB54\uAC00\u0020\uC788\uC5B4\u0020\uBCF4\uC774\uB294\u0020\uC810\uB4E4\uC744\u0020\uCC0D\uACE0\u2026\u2026\u0020\uADF8\u0020\uC810\uB4E4\uC744\u0020\uC804\uBD80\u0020\uC774\uC5B4\uC8FC\uBA74\u2026\u2026\u0020\uB300\uCDA9\u0020\uC18C\uD658\uC9C4\uCC98\uB7FC\u0020\uBCF4\uC774\uACA0\uC9C0\u002E"
+    characterSprite: {fileID: 0}
+    expressionId: default
+    characterPosition: 1
+    backgroundImage: {fileID: 0}
+    eventId: 
+  - speakerName: "\uC8FC\uC778\uACF5"
+    dialogueText: "\uC0C9\uC740\u0020\uB2F9\uC5F0\uD788\u0020\uBD89\uC740\uC0C9\uC774\uC5B4\uC57C\uACA0\uC9C0\u003F\u0020\uC545\uB9C8\u0020\uC18C\uD658\uC778\uB370\u0020\uD30C\uB780\uC0C9\uC774\uBA74\u0020\uC880\u0020\uC131\uC758\u0020\uC5C6\uC5B4\u0020\uBCF4\uC774\uC796\uC544\u002E"
+    characterSprite: {fileID: 0}
+    expressionId: default
+    characterPosition: 1
+    backgroundImage: {fileID: 0}
+    eventId: 
+  - speakerName: "\uC8FC\uC778\uACF5"
+    dialogueText: "\uC88B\uC544\u002E\u0020\uC5C4\uB9C8\uBC29\u0020\uC11C\uB78D\uC5D0\u0020\uC788\uB294\u0020\uBE68\uAC04\uC0C9\u0020\uB9BD\uC2A4\uD2F1\uC744\u0020\uC7A0\uAE50\uB9CC\u0020\uBE4C\uB9AC\uC790\u002E\u0020\uC7A0\uAE50\uB9CC\u002E\u0020\uC815\uB9D0\u0020\uC7A0\uAE50\uB9CC\u002E"
+    characterSprite: {fileID: 0}
+    expressionId: default
+    characterPosition: 1
+    backgroundImage: {fileID: 0}
+    eventId: 
+  closeLines:
+  - speakerName: "\uC8FC\uC778\uACF5"
+    dialogueText: "\uC88B\uC558\uC5B4\u002E\u002E\u002E\u0020\uB9C8\uC9C0\uB9C9\uC73C\uB85C\u0020\uC774\u0020\uC810\uB9CC\u0020\uC774\uC5B4\uC8FC\uBA74\u2026\u2026"
+    characterSprite: {fileID: 0}
+    expressionId: default
+    characterPosition: 1
+    backgroundImage: {fileID: 0}
+    eventId: 
+  - speakerName: "\uC8FC\uC778\uACF5"
+    dialogueText: "\uB410\uB2E4\u2026\u2026\u0021\u0020\uB9C8\uBC95\uC9C4\u0020\uC644\uC131\u0021\u0021"
+    characterSprite: {fileID: 0}
+    expressionId: happy
+    characterPosition: 1
+    backgroundImage: {fileID: 0}
+    eventId: 
+  - speakerName: "\uC8FC\uC778\uACF5"
+    dialogueText: "\uB9C8\uC655\uB2D8\uAED8\u0020\uBCF4\uB0B4\uB294\u0020\uCCAB\uC778\uC0C1\uC778\uB370\u002C\u0020\uB108\uBB34\u0020\uB300\uCDA9\u0020\uADF8\uB9B0\u0020\uAC83\uCC98\uB7FC\u0020\uBCF4\uC774\uBA74\u0020\uC548\u0020\uB418\uB2C8\uAE4C\u2026\u2026\u0020\uB0B4\uAC00\u0020\uCD08\uB4F1\uD559\uAD50\u0020\uB54C\uBD80\uD130\u0020\uC544\uAEF4\u0020\uC4F0\uB358\u0020\uC904\uC790\uAE4C\uC9C0\u0020\uAEBC\uB0B4\uC11C\u0020\uB098\uB984\u0020\uC815\uC131\uC2A4\uB7FD\uAC8C\u0020\uADF8\uB9AC\uAE34\u0020\uD588\uB294\uB370\u2026\u2026"
+    characterSprite: {fileID: 0}
+    expressionId: default
+    characterPosition: 1
+    backgroundImage: {fileID: 0}
+    eventId: 
+  - speakerName: "\uC8FC\uC778\uACF5"
+    dialogueText: "\uC544\uB2C8\u002C\u0020\uADFC\uB370\u0020\uC0DD\uAC01\uD574\uBCF4\uBA74\u0020\uB9C8\uC655\uB3C4\u0020\uBC14\uC058\uC2E4\u0020\uD150\uB370\u002C\u0020\uB108\uBB34\u0020\uBCF5\uC7A1\uD55C\u0020\uC18C\uD658\uC9C4\uBCF4\uB2E4\uB294\u0020\uC774\uB807\uAC8C\u0020\uAC04\uB2E8\uD55C\u0020\uCABD\uC774\u0020\uC624\uD788\uB824\u0020\uBCF4\uAE30\u0020\uD3B8\uD558\uC9C0\u0020\uC54A\uC744\uAE4C\u003F"
+    characterSprite: {fileID: 0}
+    expressionId: default
+    characterPosition: 1
+    backgroundImage: {fileID: 0}
+    eventId: 
+  - speakerName: "\uC8FC\uC778\uACF5"
+    dialogueText: "\uADF8\uB798\u002E\u0020\uBBF8\uB2C8\uBA40\uB9AC\uC998\u002E\u0020\uC694\uC998\u0020\uB300\uC138\uB294\u0020\uBBF8\uB2C8\uBA40\uB9AC\uC998\uC774\uC9C0\u002E"
+    characterSprite: {fileID: 0}
+    expressionId: default
+    characterPosition: 1
+    backgroundImage: {fileID: 0}
+    eventId: 
+  - speakerName: "\uC8FC\uC778\uACF5"
+    dialogueText: "\uC774\uAC74\u0020\uB300\uCDA9\u0020\uADF8\uB9B0\u0020\uAC8C\u0020\uC544\uB2C8\uB77C\u002C\u0020\uBBF8\uB2C8\uBA40\uB9AC\uC998\u0020\uC18C\uD658\uC9C4\uC774\uC57C\u002E"
+    characterSprite: {fileID: 0}
+    expressionId: default
+    characterPosition: 1
+    backgroundImage: {fileID: 0}
+    eventId: 
+  - speakerName: "\uC8FC\uC778\uACF5"
+    dialogueText: "\uC88B\uC544\u002E\u0020\uC774\uC81C\u0020\uB9C8\uC655\uB9CC\u0020\uB098\uC640\uC11C\u0020\uB0B4\uAC00\u0020\uCCAD\uD63C\uD558\uBA74\u0020\uB418\uB294\u0020\uAC70\uC57C\u002E"
+    characterSprite: {fileID: 0}
+    expressionId: default
+    characterPosition: 1
+    backgroundImage: {fileID: 0}
+    eventId: 
+  - speakerName: "\uC8FC\uC778\uACF5"
+    dialogueText: "\uD6C4\u2026\u2026\u0020\uCE68\uCC29\uD558\uC790\u002E\u0020\uACE7\u0020\uB0B4\u0020\uC778\uC0DD\uC758\u0020\uC804\uD658\uC810\uC774\u0020\uC2DC\uC791\uB41C\uB2E4\u002E"
+    characterSprite: {fileID: 0}
+    expressionId: default
+    characterPosition: 1
+    backgroundImage: {fileID: 0}
+    eventId: 
+  - speakerName: "\uC8FC\uC778\uACF5"
+    dialogueText: "\uB098\uC640\uB77C\u002C\u0020\uB9C8\uC655\u0021\u0020\uADF8\uB9AC\uACE0\u0020\uB0B4\u0020\uC2E0\uB791\uC774\u0020\uB418\uC5B4\uB77C\u0021"
+    characterSprite: {fileID: 0}
+    expressionId: happy
+    characterPosition: 1
+    backgroundImage: {fileID: 0}
+    eventId: 
+  - speakerName: "\uC8FC\uC778\uACF5"
+    dialogueText: "\u2026\u2026"
+    characterSprite: {fileID: 0}
+    expressionId: default
+    characterPosition: 1
+    backgroundImage: {fileID: 0}
+    eventId: 
+  - speakerName: "\uC8FC\uC778\uACF5"
+    dialogueText: "\u2026\u2026\u2026\u2026"
+    characterSprite: {fileID: 0}
+    expressionId: default
+    characterPosition: 1
+    backgroundImage: {fileID: 0}
+    eventId: 
+  - speakerName: "\uC8FC\uC778\uACF5"
+    dialogueText: "\u2026\u2026\u2026\u2026\u2026\u2026"
+    characterSprite: {fileID: 0}
+    expressionId: default
+    characterPosition: 1
+    backgroundImage: {fileID: 0}
+    eventId: 
+  - speakerName: "\uC8FC\uC778\uACF5"
+    dialogueText: "\uC544\u002C\u0020\uC544\uBB34\u0020\uC77C\uB3C4\u0020\uC548\u0020\uC77C\uC5B4\uB098\uB124\u002E"
+    characterSprite: {fileID: 0}
+    expressionId: default
+    characterPosition: 1
+    backgroundImage: {fileID: 0}
+    eventId: 
+  - speakerName: "\uC8FC\uC778\uACF5"
+    dialogueText: "\uC544\u2026\u2026\u0020\uADF8\uB807\uC9C0\u2026\u2026\u0020\uC774\uB7F0\u0020\uAC78\uB85C\u0020\uB420\u0020\uB9AC\uAC00\u0020\uC5C6\uB098\u002E"
+    characterSprite: {fileID: 0}
+    expressionId: default
+    characterPosition: 1
+    backgroundImage: {fileID: 0}
+    eventId: 
+  - speakerName: "\uC8FC\uC778\uACF5"
+    dialogueText: "\uBB50\uAC00\u0020\uBB38\uC81C\uC600\uC9C0\u003F\u0020\uC810\uC774\u0020\uB108\uBB34\u0020\uC801\uC5C8\uB098\u003F\u0020\uB9BD\uC2A4\uD2F1\u0020\uC0C9\uAE54\uC774\u0020\uB9C8\uC655\u0020\uCDE8\uD5A5\uC774\u0020\uC544\uB2CC\uAC00\u003F"
+    characterSprite: {fileID: 0}
+    expressionId: default
+    characterPosition: 1
+    backgroundImage: {fileID: 0}
+    eventId: 
+  - speakerName: "\uC8FC\uC778\uACF5"
+    dialogueText: "\uC74C\u2026\u2026\u0020\uC5B4\uB5BB\uAC8C\u0020\uD558\uBA74\u0020\uC88B\uC9C0\u003F"
+    characterSprite: {fileID: 0}
+    expressionId: default
+    characterPosition: 1
+    backgroundImage: {fileID: 0}
+    eventId: 
+  - speakerName: "\uC8FC\uC778\uACF5"
+    dialogueText: "\uC77C\uB2E8\u0020\uC81C\uB300\uB85C\u0020\uB41C\u0020\uC815\uBCF4\uB97C\u0020\uCC3E\uC544\uBD10\uC57C\uACA0\uC5B4\u002E"
+    characterSprite: {fileID: 0}
+    expressionId: default
+    characterPosition: 1
+    backgroundImage: {fileID: 0}
+    eventId: 
+  - speakerName: "\uC8FC\uC778\uACF5"
+    dialogueText: "\uB3C4\uC11C\uAD00\uC5D0\u0020\uAC00\uBA74\u0020\uBB50\uB77C\uB3C4\u0020\uC788\uC73C\uB824\uB098\u003F\u0020\uB9C8\uBC95\uC9C4\u0020\uC785\uBB38\uC11C\uB77C\uB4E0\uAC00\u002C\u0020\uCD08\uBCF4\uC790\uB97C\u0020\uC704\uD55C\u0020\uC545\uB9C8\u0020\uC18C\uD658\u0020\uAC19\uC740\u0020\uCC45\uC774\uB77C\uB4E0\uAC00\u2026\u2026"
+    characterSprite: {fileID: 0}
+    expressionId: default
+    characterPosition: 1
+    backgroundImage: {fileID: 0}
+    eventId: 
+  - speakerName: "\uC5C4\uB9C8"
+    dialogueText: "\u005B\uC8FC\uC778\uACF5\u005D\uC544\u0021\u0020\uB0B4\u0020\uBE68\uAC04\uC0C9\u0020\uB9BD\uC2A4\uD2F1\u0020\uBD24\uB2C8\u003F"
+    characterSprite: {fileID: 0}
+    expressionId: default
+    characterPosition: 1
+    backgroundImage: {fileID: 0}
+    eventId: 
+  - speakerName: "\uC8FC\uC778\uACF5"
+    dialogueText: "\uC73D\u002E"
+    characterSprite: {fileID: 0}
+    expressionId: nervous
+    characterPosition: 1
+    backgroundImage: {fileID: 0}
+    eventId: 
+  - speakerName: "\uC5C4\uB9C8"
+    dialogueText: "\uBD84\uBA85\u0020\uC11C\uB78D\uC5D0\u0020\uB480\uB294\uB370\u0020\uC5B4\uB514\u0020\uAC14\uC9C0\u003F\u0020\uC9C0\uAE08\u0020\uC368\uC57C\u0020\uD558\uB294\uB370\u0021"
+    characterSprite: {fileID: 0}
+    expressionId: default
+    characterPosition: 1
+    backgroundImage: {fileID: 0}
+    eventId: 
+  - speakerName: "\uC8FC\uC778\uACF5"
+    dialogueText: "\uD070\uC77C\u0020\uB0AC\uB2E4\u002E\u0020\uC5C4\uB9C8\uD55C\uD14C\u0020\uC774\u0020\uBC29\u0020\uAF34\uC744\u0020\uB4E4\uD0A4\uBA74\u0020\uC545\uB9C8\uBCF4\uB2E4\u0020\uC5C4\uB9C8\uAC00\u0020\uBA3C\uC800\u0020\uB0A0\u0020\uB9C8\uACC4\uB85C\u0020\uBCF4\uB0B4\uBC84\uB9B4\u0020\uAC70\uC57C\u002E"
+    characterSprite: {fileID: 0}
+    expressionId: nervous
+    characterPosition: 1
+    backgroundImage: {fileID: 0}
+    eventId: 
+  - speakerName: "\uC8FC\uC778\uACF5"
+    dialogueText: "\uC77C\uB2E8\u0020\uC624\uB298\uC740\u0020\uC5EC\uAE30\uAE4C\uC9C0\u002E\u0020\uB0B4\uC77C\u0020\uB3C4\uC11C\uAD00\uC5D0\u0020\uAC00\uC11C\u0020\uC81C\uB300\uB85C\u0020\uB41C\u0020\uC18C\uD658\u0020\uBC29\uBC95\uC744\u0020\uCC3E\uC544\uBCF4\uC790\u002E"
+    characterSprite: {fileID: 0}
+    expressionId: default
+    characterPosition: 1
+    backgroundImage: {fileID: 0}
+    eventId: 
+  - speakerName: "\uC8FC\uC778\uACF5"
+    dialogueText: "\uAE30\uB2E4\uB824\uB77C\u002C\u0020\uB9C8\uC655\u2026\u2026\u0020\uC624\uB298\uC740\u0020\uC2E4\uD328\uD588\uC9C0\uB9CC\u002C\u0020\uC774\uAC74\u0020\uC5B4\uB514\uAE4C\uC9C0\uB098\u0020\uC2DC\uD589\uCC29\uC624\uC77C\u0020\uBFD0\uC774\uB2C8\uAE4C\u002E"
+    characterSprite: {fileID: 0}
+    expressionId: default
+    characterPosition: 1
+    backgroundImage: {fileID: 0}
+    eventId: 
+  - speakerName: "\uC8FC\uC778\uACF5"
+    dialogueText: "\uB098\uC640\u0020\uACB0\uD63C\uD560\u0020\uADF8\u0020\uB0A0\uB9CC\uC744\u0020\uC55E\uB450\uACE0\u0020\uC788\uC73C\uB77C\uACE0\u002E\u002E\u002E\u0021"
+    characterSprite: {fileID: 0}
+    expressionId: happy
+    characterPosition: 1
+    backgroundImage: {fileID: 0}
+    eventId: 
