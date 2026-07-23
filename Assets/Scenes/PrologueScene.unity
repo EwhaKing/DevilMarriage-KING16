@@ -561,9 +561,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SceneChanger
   settingPopup: {fileID: 0}
   characterPortrait: {fileID: 1008241499}
-  portraitDefault: {fileID: -3775748125889451718, guid: 9cc6e02500b5e634d85f1cad054c7d0d, type: 3}
-  portraitHappy: {fileID: 2519535751737866915, guid: 20d057d2a11dd7d489f06463498c32fc, type: 3}
-  portraitNervous: {fileID: 63942531549172350, guid: 02b2b5a9c4461ab4f9b7ae8e9c6dbf5a, type: 3}
+  portraitDefault: {fileID: -6744282973993089268, guid: 50fcd319985cc404abcc9e5ac543c593, type: 3}
+  portraitHappy: {fileID: -4145775907152824207, guid: 03f2aba6326f7f54696282b2c0de59a9, type: 3}
+  portraitNervous: {fileID: -8142544645332988256, guid: 7e5c35db5b8861841a2dff262455925b, type: 3}
 --- !u!4 &295417366
 Transform:
   m_ObjectHideFlags: 0
@@ -1662,6 +1662,7 @@ MonoBehaviour:
   speakerNameText: {fileID: 1102134005}
   dialogueBodyText: {fileID: 774845138}
   characterImage: {fileID: 1008241499}
+  storyImage: {fileID: 2008241499}
   backgroundImage: {fileID: 743996863}
   continueIcon: {fileID: 1622149160}
   nextButton: {fileID: 1622149161}
@@ -1671,9 +1672,24 @@ MonoBehaviour:
   settingButton: {fileID: 342020105}
   createUiAtRuntimeIfMissing: 0
   adjustCharacterPositionFromData: 0
-  portraitDefault: {fileID: -3775748125889451718, guid: 9cc6e02500b5e634d85f1cad054c7d0d, type: 3}
-  portraitHappy: {fileID: 2519535751737866915, guid: 20d057d2a11dd7d489f06463498c32fc, type: 3}
-  portraitNervous: {fileID: 63942531549172350, guid: 02b2b5a9c4461ab4f9b7ae8e9c6dbf5a, type: 3}
+  portraitDefault: {fileID: -6744282973993089268, guid: 50fcd319985cc404abcc9e5ac543c593, type: 3}
+  portraitHappy: {fileID: -4145775907152824207, guid: 03f2aba6326f7f54696282b2c0de59a9, type: 3}
+  portraitNervous: {fileID: -8142544645332988256, guid: 7e5c35db5b8861841a2dff262455925b, type: 3}
+  expressionSprites:
+  - id: wake
+    sprite: {fileID: 3775933591331772490, guid: b66cd3d194bea14469a7c9c28522b465, type: 3}
+  - id: dark
+    sprite: {fileID: -7610500112949186696, guid: fc2587d423880e24c8f5eb131e0df446, type: 3}
+  - id: angry
+    sprite: {fileID: -1916337246509762367, guid: 43d74538937570048a15bca03c1c7dce, type: 3}
+  - id: cry
+    sprite: {fileID: -5745853835471835315, guid: b1b58c0f94499c74c84f39c1499158a1, type: 3}
+  - id: sparkle
+    sprite: {fileID: -5940502829205161261, guid: af45c276e467caf4db9e5463ea0b0c2a, type: 3}
+  - id: scheming
+    sprite: {fileID: 2095402381995588804, guid: c62a91205d832314d808bb7f73c21afc, type: 3}
+  - id: base
+    sprite: {fileID: 535582109443181164, guid: 2a7d3423518e5de459f30da2eab1663a, type: 3}
   typingSpeed: 0.03
   autoDelayAfterLine: 1.2
   dialogueFont: {fileID: 11400000, guid: af0a9d171e1c29048a7ecbd1dcb08ffd, type: 2}
@@ -1758,6 +1774,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 743996862}
+  - {fileID: 2008241498}
   - {fileID: 1008241498}
   - {fileID: 1628560392}
   - {fileID: 1446389943}
@@ -1789,7 +1806,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1008241498
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1829,8 +1846,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -3775748125889451718, guid: 9cc6e02500b5e634d85f1cad054c7d0d, type: 3}
-  m_Type: 1
+  m_Sprite: {fileID: -6744282973993089268, guid: 50fcd319985cc404abcc9e5ac543c593, type: 3}
+  m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
@@ -2376,7 +2393,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.83, y: 0.92}
   m_AnchorMax: {x: 0.93, y: 0.98}
-  m_AnchoredPosition: {x: -213, y: -43.41501}
+  m_AnchoredPosition: {x: -213, y: -43.41504}
   m_SizeDelta: {x: -59.745, y: 64.37}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1461009743
@@ -2833,7 +2850,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.72, y: 0.92}
   m_AnchorMax: {x: 0.82, y: 0.98}
-  m_AnchoredPosition: {x: -173, y: -43.415}
+  m_AnchoredPosition: {x: -173, y: -43.41504}
   m_SizeDelta: {x: -59.93, y: 64.37}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1675023824
@@ -2991,6 +3008,81 @@ CanvasRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1928108709}
+  m_CullTransparentMesh: 1
+--- !u!1 &2008241497
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2008241498}
+  - component: {fileID: 2008241500}
+  - component: {fileID: 2008241499}
+  m_Layer: 5
+  m_Name: StorySprite
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &2008241498
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2008241497}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 589.3589}
+  m_LocalScale: {x: 0.045454547, y: 0.045454547, z: 0.045454547}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1001922447}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0.5}
+  m_AnchorMax: {x: 0, y: 0.5}
+  m_AnchoredPosition: {x: 346, y: -24}
+  m_SizeDelta: {x: 26997.64, y: 17135.79}
+  m_Pivot: {x: 0, y: 0.5}
+--- !u!114 &2008241499
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2008241497}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 8753632777509334865, guid: 2967b4a5c9a98fd46aa3c940da07860a, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 1
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &2008241500
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2008241497}
   m_CullTransparentMesh: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

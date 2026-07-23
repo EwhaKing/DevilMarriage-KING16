@@ -18,8 +18,8 @@ public class DialogueLine
     [Tooltip("이 줄에서 보여줄 캐릭터 스프라이트 (비워두면 이전 이미지를 유지)")]
     public Sprite characterSprite;
 
-    [Tooltip("표정 ID. DialogueManager에 등록된 표정 스프라이트 키와 맞춥니다. (예: default, happy, nervous)")]
-    public string expressionId = "default";
+    [Tooltip("표정 ID. 비우면 이전 표정 유지.\n예: default, wake, nervous, dark, angry, cry, sparkle, scheming, happy")]
+    public string expressionId = "";
 
     [Tooltip("캐릭터를 왼쪽/가운데/오른쪽 중 어디에 둘지")]
     public CharacterPosition characterPosition = CharacterPosition.Center;

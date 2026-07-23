@@ -95,7 +95,7 @@ public class Stage1PlayTutorialController : MonoBehaviour
 
         yield return ShowDialogue(new[]
         {
-            "주인공|오옷... 생각보다 그럴듯한데? 나 혹시 재능 있나?",
+            "주인공|오오... 생각보다 그럴듯한데? 나 혹시 재능 있나?",
             "주인공|좋아. 그럼 이제 복잡하게 생각하지 말고, 모든 점을 전부 이어버리면 되는 거야."
         });
 
@@ -128,7 +128,11 @@ public class Stage1PlayTutorialController : MonoBehaviour
         foreach (var line in lines)
         {
             var parts = line.Split(new[] { '|' }, 2);
-            _speakerText.text = parts[0];
+            var speaker = parts[0];
+            if (speaker == "주인공")
+                speaker = PlayerNameManager.PlayerName;
+
+            _speakerText.text = speaker;
             _bodyText.text = parts.Length > 1 ? parts[1] : string.Empty;
             _waitingForAdvance = true;
 

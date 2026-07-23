@@ -22,6 +22,8 @@ public class DialogueManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI speakerNameText;
     [SerializeField] private TextMeshProUGUI dialogueBodyText;
     [SerializeField] private Image characterImage;
+    [Tooltip("주인공 등장 전 스토리/나레이션용 이미지. 없으면 CharacterSprite만 사용합니다.")]
+    [SerializeField] private Image storyImage;
     [SerializeField] private Image backgroundImage;
     [SerializeField] private GameObject continueIcon;
     [SerializeField] private Button nextButton;
@@ -42,6 +44,15 @@ public class DialogueManager : MonoBehaviour
     [SerializeField] private Sprite portraitDefault;
     [SerializeField] private Sprite portraitHappy;
     [SerializeField] private Sprite portraitNervous;
+    [Tooltip("추가 표정. id 예: wake, dark, angry, cry, sparkle, scheming")]
+    [SerializeField] private ExpressionSprite[] expressionSprites;
+
+    [System.Serializable]
+    public class ExpressionSprite
+    {
+        public string id;
+        public Sprite sprite;
+    }
 
     [Header("타이핑")]
     [SerializeField] private float typingSpeed = 0.03f;
@@ -82,12 +93,15 @@ public class DialogueManager : MonoBehaviour
     private float _currentAutoDelay;
     private bool _rushThenFadePending;
     private bool _rushModeActive;
+    private bool _protagonistRevealed;
 
     /// <summary>외부 이벤트(이름 입력·암전 등) 대기 중인지</summary>
     public bool IsWaitingForExternalEvent => _waitingForExternalEvent;
 
     /// <summary>현재 줄 타이핑이 끝났는지</summary>
     public bool IsLineFullyShown => _lineFullyShown && !_isTyping;
+
+    public Sprite PortraitDefault => portraitDefault;
 
     /// <summary>
     /// 씬이 로드되자마자 Yarn DialogueRunner 자동 시작을 막아
@@ -106,6 +120,9 @@ public class DialogueManager : MonoBehaviour
         // AddComponent로 붙인 경우 UnityEvent가 null일 수 있어 보장합니다.
         if (onDialogueFinished == null)
             onDialogueFinished = new UnityEvent();
+
+        // 한글은 공백 기준으로만 줄바꿈 (전통 규칙은 글자 중간에서도 끊김)
+        TMP_Settings.useModernHangulLineBreakingRules = true;
 
         ResolveDialogueFont();
         BuildExpressionMap();
@@ -201,9 +218,13 @@ public class DialogueManager : MonoBehaviour
         _rushThenFadePending = false;
         _rushModeActive = false;
         _autoEnabled = false;
+        _protagonistRevealed = false;
         _currentTypingSpeed = typingSpeed;
         _currentAutoDelay = autoDelayAfterLine;
         _logEntries.Clear();
+
+        ResolveStoryImage();
+        ApplyProtagonistPresentation(false);
 
         if (_rushCoroutine != null)
         {
@@ -314,7 +335,7 @@ public class DialogueManager : MonoBehaviour
         ApplyVisuals(line);
 
         _fullLineText = FormatText(line.dialogueText);
-        _logEntries.Add($"{line.speakerName}: {_fullLineText}");
+        _logEntries.Add($"{FormatSpeakerName(line.speakerName)}: {_fullLineText}");
 
         // 이벤트만 있고 대사가 비어 있으면 이벤트 실행
         if (string.IsNullOrWhiteSpace(_fullLineText))
@@ -376,7 +397,8 @@ public class DialogueManager : MonoBehaviour
                 break;
             }
 
-            builder.Append(_fullLineText[i]);
+            char c = _fullLineText[i];
+            builder.Append(c);
             dialogueBodyText.text = builder.ToString();
             yield return new WaitForSecondsRealtime(_currentTypingSpeed);
         }
@@ -487,15 +509,24 @@ public class DialogueManager : MonoBehaviour
 
     private void ApplyVisuals(DialogueLine line)
     {
+        string rawSpeaker = line.speakerName ?? "";
+        string displaySpeaker = FormatSpeakerName(rawSpeaker);
+
         if (speakerNameText != null)
-            speakerNameText.text = line.speakerName ?? "";
+            speakerNameText.text = displaySpeaker;
+
+        if (IsProtagonistSpeaker(rawSpeaker) || IsProtagonistSpeaker(displaySpeaker))
+            RevealProtagonist();
+        else if (!_protagonistRevealed)
+            ApplyProtagonistPresentation(false);
 
         if (backgroundImage != null && line.backgroundImage != null)
             backgroundImage.sprite = line.backgroundImage;
 
-        if (characterImage != null)
+        if (characterImage != null && _protagonistRevealed)
         {
             Sprite sprite = line.characterSprite;
+            // expressionId가 비어 있으면 이전 표정 유지
             if (sprite == null && !string.IsNullOrWhiteSpace(line.expressionId))
                 _expressionMap.TryGetValue(line.expressionId, out sprite);
 
@@ -548,8 +579,65 @@ public class DialogueManager : MonoBehaviour
             .Replace("[주인공]", name);
 
         // TMP 폰트에 U+2026(…) 글리프가 없어 점이 빠져 보이는 문제 → ASCII 마침표로 치환
-        formatted = formatted.Replace("\u2026", "...");
-        return formatted;
+        return formatted.Replace("\u2026", "...");
+    }
+
+    private static string FormatSpeakerName(string speaker)
+    {
+        if (string.IsNullOrWhiteSpace(speaker))
+            return "";
+
+        if (IsProtagonistSpeaker(speaker))
+            return PlayerNameManager.PlayerName;
+
+        return speaker;
+    }
+
+    private static bool IsProtagonistSpeaker(string speaker)
+    {
+        if (string.IsNullOrWhiteSpace(speaker))
+            return false;
+
+        if (speaker == "주인공")
+            return true;
+
+        // 이미 플레이어 이름으로 저장된 경우에도 주인공으로 취급
+        return PlayerNameManager.HasCustomName &&
+               string.Equals(speaker, PlayerNameManager.PlayerName, System.StringComparison.Ordinal);
+    }
+
+    private void RevealProtagonist()
+    {
+        _protagonistRevealed = true;
+        ApplyProtagonistPresentation(true);
+    }
+
+    private void ApplyProtagonistPresentation(bool showProtagonist)
+    {
+        ResolveStoryImage();
+
+        if (storyImage != null)
+        {
+            storyImage.gameObject.SetActive(!showProtagonist);
+            storyImage.enabled = !showProtagonist;
+        }
+
+        if (characterImage != null)
+        {
+            characterImage.gameObject.SetActive(showProtagonist);
+            if (showProtagonist)
+                characterImage.enabled = true;
+        }
+    }
+
+    private void ResolveStoryImage()
+    {
+        if (storyImage != null)
+            return;
+
+        var storyObject = GameObject.Find("StorySprite");
+        if (storyObject != null)
+            storyImage = storyObject.GetComponent<Image>();
     }
 
     private IEnumerator RushRampCoroutine(float targetTypingSpeed, float targetAutoDelay, float rampDuration)
@@ -733,9 +821,31 @@ public class DialogueManager : MonoBehaviour
     private void BuildExpressionMap()
     {
         _expressionMap.Clear();
-        if (portraitDefault != null) _expressionMap["default"] = portraitDefault;
-        if (portraitHappy != null) _expressionMap["happy"] = portraitHappy;
-        if (portraitNervous != null) _expressionMap["nervous"] = portraitNervous;
+        if (portraitDefault != null)
+        {
+            _expressionMap["default"] = portraitDefault;
+            _expressionMap["plain"] = portraitDefault;
+            _expressionMap["normal"] = portraitDefault;
+        }
+
+        if (portraitHappy != null)
+            _expressionMap["happy"] = portraitHappy;
+
+        if (portraitNervous != null)
+        {
+            _expressionMap["nervous"] = portraitNervous;
+            _expressionMap["upset"] = portraitNervous;
+        }
+
+        if (expressionSprites == null)
+            return;
+
+        foreach (var entry in expressionSprites)
+        {
+            if (entry == null || entry.sprite == null || string.IsNullOrWhiteSpace(entry.id))
+                continue;
+            _expressionMap[entry.id.Trim()] = entry.sprite;
+        }
     }
 
     private void DisableYarnComponentsIfAny()
@@ -781,6 +891,13 @@ public class DialogueManager : MonoBehaviour
             var ch = GameObject.Find("CharacterSprite");
             if (ch != null)
                 characterImage = ch.GetComponent<Image>();
+        }
+
+        if (storyImage == null)
+        {
+            var story = GameObject.Find("StorySprite");
+            if (story != null)
+                storyImage = story.GetComponent<Image>();
         }
 
         // Yarn Line Presenter의 TMP는 사용하지 않고, DialogueCanvas 쪽만 씁니다.
@@ -1049,7 +1166,12 @@ public class DialogueManager : MonoBehaviour
             speakerNameText.font = dialogueFont;
 
         if (dialogueBodyText != null)
+        {
             dialogueBodyText.font = dialogueFont;
+            dialogueBodyText.enableAutoSizing = false;
+            dialogueBodyText.textWrappingMode = TextWrappingModes.Normal;
+            dialogueBodyText.overflowMode = TextOverflowModes.Overflow;
+        }
     }
 
     private void StopAllDialogueCoroutines()

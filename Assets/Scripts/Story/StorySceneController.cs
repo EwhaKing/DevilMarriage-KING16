@@ -41,10 +41,14 @@ public class StorySceneController : MonoBehaviour
 
         if (sceneChanger != null)
         {
-            dialogueManager.SetPortraitSprites(
-                sceneChanger.PortraitDefault,
-                sceneChanger.PortraitHappy,
-                sceneChanger.PortraitNervous);
+            if (dialogueManager.PortraitDefault == null)
+            {
+                dialogueManager.SetPortraitSprites(
+                    sceneChanger.PortraitDefault,
+                    sceneChanger.PortraitHappy,
+                    sceneChanger.PortraitNervous);
+            }
+
             dialogueManager.SetSettingPopup(sceneChanger.SettingPopup);
         }
 

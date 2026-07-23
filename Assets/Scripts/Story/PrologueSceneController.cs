@@ -83,10 +83,15 @@ public class PrologueSceneController : MonoBehaviour
 
         if (sceneChanger != null)
         {
-            dialogueManager.SetPortraitSprites(
-                sceneChanger.PortraitDefault,
-                sceneChanger.PortraitHappy,
-                sceneChanger.PortraitNervous);
+            // DialogueManager에 이미 Art/주인공 표정이 있으면 SceneChanger 값으로 덮어쓰지 않음
+            if (dialogueManager.PortraitDefault == null)
+            {
+                dialogueManager.SetPortraitSprites(
+                    sceneChanger.PortraitDefault,
+                    sceneChanger.PortraitHappy,
+                    sceneChanger.PortraitNervous);
+            }
+
             dialogueManager.SetSettingPopup(sceneChanger.SettingPopup);
         }
 
@@ -166,7 +171,10 @@ public class PrologueSceneController : MonoBehaviour
 
         if (_nameInput != null)
         {
-            _nameInput.text = string.Empty;
+            // 저장된 이름이 있으면 미리 채우고, 없으면 빈 칸으로 입력받는다
+            _nameInput.text = PlayerNameManager.HasCustomName
+                ? PlayerNameManager.PlayerName
+                : string.Empty;
             _nameInput.Select();
             _nameInput.ActivateInputField();
         }
