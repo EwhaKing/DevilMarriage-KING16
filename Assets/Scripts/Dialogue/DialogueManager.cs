@@ -12,15 +12,18 @@ using UnityEngine.Audio;
 
 /// <summary>
 /// ScriptableObject 대사를 읽어 화면에 출력하는 공용 대화 관리자입니다.
+/// StoryScene / PrologueScene 등에서 같은 컴포넌트를 재사용합니다.
 /// </summary>
 public class DialogueManager : MonoBehaviour
 {
     public static DialogueManager Instance { get; private set; }
 
     [Header("대사 UI (비어 있으면 씬의 DialogueCanvas에서 찾습니다)")]
+    [Tooltip("Play 전에 DevilMarriage/Add Dialogue UI To Open Scene 으로 배치해 두고 위치를 조절하세요.")]
     [SerializeField] private TextMeshProUGUI speakerNameText;
     [SerializeField] private TextMeshProUGUI dialogueBodyText;
     [SerializeField] private Image characterImage;
+    [Tooltip("주인공 등장 전 스토리/나레이션용 이미지. 없으면 CharacterSprite만 사용합니다.")]
     [SerializeField] private Image storyImage;
     [SerializeField] private Image backgroundImage;
     [SerializeField] private GameObject continueIcon;
@@ -31,15 +34,18 @@ public class DialogueManager : MonoBehaviour
     [SerializeField] private Button settingButton;
 
     [Header("런타임 생성 (비권장)")]
+    [Tooltip("씬에 DialogueCanvas가 없을 때만 Play 중 자동 생성합니다. 에디터에서 조절하려면 끄고 메뉴로 UI를 배치하세요.")]
     [SerializeField] private bool createUiAtRuntimeIfMissing = true;
 
     [Header("캐릭터 위치")]
+    [Tooltip("켜면 DialogueLine의 Left/Center/Right로 캐릭터 위치를 바꿉니다. 씬에서 배치한 위치를 유지하려면 끄세요.")]
     [SerializeField] private bool adjustCharacterPositionFromData = false;
 
     [Header("표정 스프라이트 (expressionId 키)")]
     [SerializeField] private Sprite portraitDefault;
     [SerializeField] private Sprite portraitHappy;
     [SerializeField] private Sprite portraitNervous;
+    [Tooltip("추가 표정. id 예: wake, dark, angry, cry, sparkle, scheming")]
     [SerializeField] private ExpressionSprite[] expressionSprites;
 
     [System.Serializable]
@@ -59,14 +65,17 @@ public class DialogueManager : MonoBehaviour
     [SerializeField] [Range(0f, 1f)] private float advanceSfxVolume = 1f;
 
     [Header("한글 폰트")]
+    [Tooltip("비우면 씬의 Noto 폰트 또는 Resources/Fonts 에서 자동으로 찾습니다.")]
     [SerializeField] private TMP_FontAsset dialogueFont;
 
     [Header("설정 팝업 (기존 SoundSettings 연결)")]
     [SerializeField] private GameObject settingPopup;
 
     [Header("이벤트")]
+    [Tooltip("대화가 모두 끝났을 때 호출됩니다.")]
     public UnityEvent onDialogueFinished = new UnityEvent();
 
+    /// <summary>요청된 커스텀 이벤트 ID를 외부에서 처리하고 싶을 때 구독합니다.</summary>
     public event Action<string> OnCustomEvent;
 
     private readonly List<DialogueLine> _lines = new();
@@ -94,10 +103,18 @@ public class DialogueManager : MonoBehaviour
 
     private AudioSource _sfxSource;
 
+    /// <summary>외부 이벤트(이름 입력·암전 등) 대기 중인지</summary>
     public bool IsWaitingForExternalEvent => _waitingForExternalEvent;
+
+    /// <summary>현재 줄 타이핑이 끝났는지</summary>
     public bool IsLineFullyShown => _lineFullyShown && !_isTyping;
+
     public Sprite PortraitDefault => portraitDefault;
 
+    /// <summary>
+    /// 씬이 로드되자마자 Yarn DialogueRunner 자동 시작을 막아
+    /// 새 DialogueManager와 충돌하지 않게 합니다.
+    /// </summary>
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void DisableYarnRunnersOnSceneLoad()
     {
@@ -108,9 +125,11 @@ public class DialogueManager : MonoBehaviour
     {
         Instance = this;
 
+        // AddComponent로 붙인 경우 UnityEvent가 null일 수 있어 보장합니다.
         if (onDialogueFinished == null)
             onDialogueFinished = new UnityEvent();
 
+        // 한글은 공백 기준으로만 줄바꿈 (전통 규칙은 글자 중간에서도 끊김)
         TMP_Settings.useModernHangulLineBreakingRules = true;
 
         ResolveDialogueFont();
@@ -162,6 +181,7 @@ public class DialogueManager : MonoBehaviour
         if (!_isPlaying || _waitingForExternalEvent)
             return;
 
+        // 새 Input System 사용 (Player Settings가 Input System Package 전용)
         var keyboard = Keyboard.current;
         if (keyboard != null &&
             (keyboard.spaceKey.wasPressedThisFrame || keyboard.enterKey.wasPressedThisFrame))
@@ -170,6 +190,7 @@ public class DialogueManager : MonoBehaviour
             return;
         }
 
+        // 마우스 클릭: UI 위(다음 버튼 등)면 Update에서 무시 → 버튼 onClick만 처리
         var mouse = Mouse.current;
         if (mouse != null && mouse.leftButton.wasPressedThisFrame)
         {
@@ -200,6 +221,7 @@ public class DialogueManager : MonoBehaviour
 
         if (_isTyping)
         {
+            // 타이핑 중 클릭 → 문장 즉시 완성
             CompleteTypingImmediately();
             return;
         }
@@ -208,6 +230,9 @@ public class DialogueManager : MonoBehaviour
             AdvanceToNextLine();
     }
 
+    /// <summary>
+    /// StageDialogueData의 Open 또는 Close 대사를 시작합니다.
+    /// </summary>
     public void StartStageDialogue(StageDialogueData data, bool isOpening)
     {
         if (data == null)
@@ -220,6 +245,9 @@ public class DialogueManager : MonoBehaviour
         StartDialogue(data.GetLines(isOpening));
     }
 
+    /// <summary>
+    /// 임의의 대사 목록을 재생합니다. (프롤로그 등)
+    /// </summary>
     public void StartDialogue(IReadOnlyList<DialogueLine> lines)
     {
         StopAllDialogueCoroutines();
@@ -265,9 +293,13 @@ public class DialogueManager : MonoBehaviour
         ShowCurrentLine();
     }
 
+    /// <summary>
+    /// 타이핑/자동 넘김 속도를 점점 빠르게 만듭니다. (프롤로그 칭찬 구간용)
+    /// </summary>
     public void BeginRushPresentation(float targetTypingSpeed = 0.004f, float targetAutoDelay = 0.12f, float rampDuration = 2.2f)
     {
         _rushModeActive = true;
+        // 칭찬 2줄만 자동 넘김. 방 장면 등 다른 구간에서는 EndRushPresentation이 auto를 끈다.
         _autoEnabled = true;
 
         if (_rushCoroutine != null)
@@ -297,6 +329,9 @@ public class DialogueManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 외부(예: 이름 입력창)에서 이벤트가 끝났을 때 호출하여 다음 줄로 넘어갑니다.
+    /// </summary>
     public void NotifyExternalEventCompleted()
     {
         _waitingForExternalEvent = false;
@@ -312,6 +347,9 @@ public class DialogueManager : MonoBehaviour
         BuildExpressionMap();
     }
 
+    /// <summary>
+    /// 기존 SceneChanger / Title 쪽 SettingPopup을 연결합니다.
+    /// </summary>
     public void SetSettingPopup(GameObject popup)
     {
         if (popup != null)
@@ -332,6 +370,7 @@ public class DialogueManager : MonoBehaviour
         _fullLineText = FormatText(line.dialogueText);
         _logEntries.Add($"{FormatSpeakerName(line.speakerName)}: {_fullLineText}");
 
+        // 이벤트만 있고 대사가 비어 있으면 이벤트 실행
         if (string.IsNullOrWhiteSpace(_fullLineText))
         {
             if (!string.IsNullOrWhiteSpace(line.eventId))
@@ -371,6 +410,7 @@ public class DialogueManager : MonoBehaviour
         _lineFullyShown = false;
         dialogueBodyText.text = "";
 
+        // 이벤트는 줄 시작 시점에 처리 (이름 입력 등)
         if (!string.IsNullOrWhiteSpace(line.eventId))
         {
             HandleEvent(line.eventId);
@@ -401,6 +441,7 @@ public class DialogueManager : MonoBehaviour
         _lineFullyShown = true;
         _typingCoroutine = null;
 
+        // 칭찬 가속 후 암전: 다음으로 넘기지 않고 Prologue가 fade 처리할 때까지 대기
         if (_rushThenFadePending)
         {
             _waitingForExternalEvent = true;
@@ -468,6 +509,7 @@ public class DialogueManager : MonoBehaviour
 
     private void HandleEvent(string eventId)
     {
+        // 외부에서 끝날 때까지 대기해야 하는 이벤트들
         switch (eventId)
         {
             case "RequestPlayerName":
@@ -479,11 +521,13 @@ public class DialogueManager : MonoBehaviour
                 break;
 
             case "AcceleratePraise":
+                // 칭찬 첫 줄: 가속+자동만 (암전 대기는 다음 줄)
                 BeginRushPresentation();
                 OnCustomEvent?.Invoke(eventId);
                 break;
 
             case "AcceleratePraiseThenFade":
+                // 칭찬 마지막 줄: 가속 유지 후 타이핑 끝나면 암전 대기
                 if (!_rushModeActive)
                     BeginRushPresentation();
                 _rushThenFadePending = true;
@@ -515,6 +559,7 @@ public class DialogueManager : MonoBehaviour
         if (characterImage != null && _protagonistRevealed)
         {
             Sprite sprite = line.characterSprite;
+            // expressionId가 비어 있으면 이전 표정 유지
             if (sprite == null && !string.IsNullOrWhiteSpace(line.expressionId))
                 _expressionMap.TryGetValue(line.expressionId, out sprite);
 
@@ -559,12 +604,14 @@ public class DialogueManager : MonoBehaviour
         if (string.IsNullOrEmpty(raw))
             return "";
 
+        // 플레이어 이름 치환 (여러 표기 지원)
         var name = PlayerNameManager.PlayerName;
         var formatted = raw
             .Replace("{$playerName}", name)
             .Replace("{playerName}", name)
             .Replace("[주인공]", name);
 
+        // TMP 폰트에 U+2026(…) 글리프가 없어 점이 빠져 보이는 문제 → ASCII 마침표로 치환
         return formatted.Replace("\u2026", "...");
     }
 
@@ -587,6 +634,7 @@ public class DialogueManager : MonoBehaviour
         if (speaker == "주인공")
             return true;
 
+        // 이미 플레이어 이름으로 저장된 경우에도 주인공으로 취급
         return PlayerNameManager.HasCustomName &&
                string.Equals(speaker, PlayerNameManager.PlayerName, System.StringComparison.Ordinal);
     }
@@ -635,6 +683,7 @@ public class DialogueManager : MonoBehaviour
         {
             elapsed += Time.unscaledDeltaTime;
             float t = Mathf.Clamp01(elapsed / Mathf.Max(0.01f, rampDuration));
+            // 초반보다 후반에 더 빠르게 가속
             t = t * t;
             _currentTypingSpeed = Mathf.Lerp(startTyping, targetTypingSpeed, t);
             _currentAutoDelay = Mathf.Lerp(startAuto, targetAutoDelay, t);
@@ -674,12 +723,14 @@ public class DialogueManager : MonoBehaviour
 
     private void TriggerSkip()
     {
+        // Skip: 남은 대사를 빠르게 넘김 (이벤트는 유지)
         _skipRequested = true;
         _autoEnabled = false;
 
         if (_isTyping)
             CompleteTypingImmediately();
 
+        // 남은 줄을 빠르게 순회하되, 외부 이벤트(이름 입력 등)에서는 멈춤
         StartCoroutine(SkipRemainingCoroutine());
     }
 
@@ -701,6 +752,7 @@ public class DialogueManager : MonoBehaviour
                 (line.eventId == "RequestPlayerName" || line.eventId == "FadeToBlack" ||
                  line.eventId == "AcceleratePraise" || line.eventId == "AcceleratePraiseThenFade"))
             {
+                // 중요 이벤트는 Skip으로 건너뛰지 않고 실행
                 HandleEvent(line.eventId);
                 if (line.eventId == "AcceleratePraiseThenFade")
                 {
@@ -736,6 +788,7 @@ public class DialogueManager : MonoBehaviour
             settingPopup.SetActive(true);
         else
         {
+            // TitleScene 등에서 쓰던 SoundSettings만 있는 경우
             var sound = FindAnyObjectByType<SoundSettings>();
             if (sound != null)
                 Debug.Log("[DialogueManager] SettingPopup이 연결되지 않았습니다. SoundSettings만 씬에 있습니다.");
@@ -775,6 +828,9 @@ public class DialogueManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 다음 대사 버튼을 눌렀을 때: 타이핑 중이면 즉시 완성, 완성되면 다음 줄.
+    /// </summary>
     private void OnNextButtonClicked()
     {
         if (!_isPlaying || _waitingForExternalEvent)
@@ -783,6 +839,10 @@ public class DialogueManager : MonoBehaviour
         HandleAdvanceInput();
     }
 
+    /// <summary>
+    /// 다음 버튼 표시 여부.
+    /// 대화 중에는 항상 보이게 해서, 타이핑 중 클릭(즉시 완성) / 완성 후 클릭(다음 줄)이 가능합니다.
+    /// </summary>
     private void SetNextButtonVisible(bool visible)
     {
         if (nextButton != null)
@@ -828,13 +888,15 @@ public class DialogueManager : MonoBehaviour
 
     private static void DisableYarnComponentsStatic()
     {
+        // 1) 예전 Yarn "Dialogue System" 오브젝트 전체를 끕니다. (새 DialogueCanvas와 중복)
         var yarnRoot = GameObject.Find("Dialogue System");
         if (yarnRoot != null && yarnRoot.activeSelf)
         {
             yarnRoot.SetActive(false);
-            Debug.Log("[DialogueManager] 예전 Yarn Dialogue System을 비활성화했습니다.");
+            Debug.Log("[DialogueManager] 예전 Yarn Dialogue System을 비활성화했습니다. 이제는 DialogueCanvas만 사용합니다.");
         }
 
+        // 2) DialogueRunner 컴포넌트가 남아 있으면 꺼서 자동 시작을 막습니다.
         var behaviours = UnityEngine.Object.FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None);
         foreach (var mb in behaviours)
         {
@@ -849,6 +911,7 @@ public class DialogueManager : MonoBehaviour
 
     private void TryBindExistingUi()
     {
+        // 배경/캐릭터 이미지는 씬에 있는 것을 재사용합니다.
         if (backgroundImage == null)
         {
             var bg = GameObject.Find("bg");
@@ -870,6 +933,7 @@ public class DialogueManager : MonoBehaviour
                 storyImage = story.GetComponent<Image>();
         }
 
+        // Yarn Line Presenter의 TMP는 사용하지 않고, DialogueCanvas 쪽만 씁니다.
         if (speakerNameText == null || dialogueBodyText == null)
         {
             var tmps = FindObjectsByType<TextMeshProUGUI>(FindObjectsSortMode.None);
@@ -890,6 +954,10 @@ public class DialogueManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// bg / CharacterSprite가 Yarn Dialogue System 아래에 있으면 DialogueCanvas로 옮겨
+    /// Dialogue System을 꺼도 배경·캐릭터가 보이게 합니다.
+    /// </summary>
     private void RescueBackgroundAndCharacterFromYarn()
     {
         var canvasGo = GameObject.Find(DialogueUiBuilder.CanvasName);
@@ -912,6 +980,7 @@ public class DialogueManager : MonoBehaviour
                 characterImage = ch.GetComponent<Image>();
         }
 
+        // inactive 포함 검색 (Yarn이 이미 꺼진 경우)
         if (backgroundImage == null || characterImage == null)
         {
             var images = FindObjectsByType<Image>(FindObjectsInactive.Include, FindObjectsSortMode.None);
@@ -929,6 +998,7 @@ public class DialogueManager : MonoBehaviour
         MoveUnderCanvasIfNeeded(backgroundImage != null ? backgroundImage.gameObject : null, canvas, 0);
         MoveUnderCanvasIfNeeded(characterImage != null ? characterImage.gameObject : null, canvas, 1);
 
+        // SceneChanger 표정이 비어 있으면 가져옴
         if (portraitDefault == null || portraitHappy == null || portraitNervous == null)
         {
             var changer = FindAnyObjectByType<SceneChanger>();
@@ -988,6 +1058,7 @@ public class DialogueManager : MonoBehaviour
 
     private void EnsureUiExists()
     {
+        // 1) Inspector에 이미 연결된 경우
         if (speakerNameText != null && dialogueBodyText != null)
         {
             if (nextButton != null)
@@ -995,15 +1066,18 @@ public class DialogueManager : MonoBehaviour
             return;
         }
 
+        // 2) 씬에 미리 배치된 DialogueCanvas 찾기 (에디터에서 조절한 UI)
         if (DialogueUiBuilder.TryFindExisting(out var found))
         {
             ApplyUiResult(found);
+            Debug.Log("[DialogueManager] 씬의 DialogueCanvas UI를 연결했습니다.");
             return;
         }
 
+        // 3) 없을 때만 런타임 생성 (폴백)
         if (!createUiAtRuntimeIfMissing)
         {
-            Debug.LogError("[DialogueManager] DialogueCanvas가 없습니다.");
+            Debug.LogError("[DialogueManager] DialogueCanvas가 없습니다. 메뉴 DevilMarriage → Add Dialogue UI To Open Scene 을 실행하세요.");
             return;
         }
 
@@ -1016,6 +1090,7 @@ public class DialogueManager : MonoBehaviour
 
         ApplyUiResult(built.Value);
         SetNextButtonVisible(false);
+        Debug.LogWarning("[DialogueManager] Play 중 Dialogue UI를 임시 생성했습니다. 위치 조절을 위해 메뉴로 씬에 미리 배치하세요.");
     }
 
     private void ApplyUiResult(DialogueUiBuilder.Result result)
@@ -1054,6 +1129,7 @@ public class DialogueManager : MonoBehaviour
         if (canvas == null)
             return;
 
+        // 간단한 런타임 폴백 로그 패널
         _logPanelRoot = new GameObject("DialogueLogPanel");
         _logPanelRoot.transform.SetParent(canvas.transform, false);
         var img = _logPanelRoot.AddComponent<Image>();
@@ -1077,6 +1153,9 @@ public class DialogueManager : MonoBehaviour
         _logPanelRoot.SetActive(false);
     }
 
+    /// <summary>
+    /// 한글이 깨지지 않도록 Noto 계열 TMP 폰트를 찾습니다.
+    /// </summary>
     private void ResolveDialogueFont()
     {
         if (dialogueFont != null)
