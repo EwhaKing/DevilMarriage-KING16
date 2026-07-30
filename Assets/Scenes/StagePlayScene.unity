@@ -1021,6 +1021,9 @@ GameObject:
   m_Component:
   - component: {fileID: 624599668}
   - component: {fileID: 624599667}
+  - component: {fileID: 624599671}
+  - component: {fileID: 624599670}
+  - component: {fileID: 624599669}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -1077,12 +1080,12 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 50
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 21300000, guid: ba787949614769a4e8a7eba78d3dbeb1, type: 3}
+  m_Sprite: {fileID: -3277405522723093287, guid: f3c3349bb0fe0b54594d209fd10eeb81, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 2.19, y: 2.41}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -1096,12 +1099,60 @@ Transform:
   m_GameObject: {fileID: 624599666}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.3, y: 0.3, z: 1}
+  m_LocalPosition: {x: -0.03, y: 0.08, z: 0}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &624599669
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 624599666}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b0e177e26764d9449d08eb7ccac0ebe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StagePlayerResourceAnimation
+  resourceManager: {fileID: 1382288042}
+  playerAnimation: {fileID: 624599670}
+--- !u!114 &624599670
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 624599666}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e67db1d77a1adb54a96b99f591c86a50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StagePlayerAnimationController
+--- !u!95 &624599671
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 624599666}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 334cd5b47e465d7479fee5f4d9947a2f, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &624829340
 GameObject:
   m_ObjectHideFlags: 0
@@ -1938,6 +1989,60 @@ RectTransform:
   m_AnchoredPosition: {x: -0.12000275, y: 0}
   m_SizeDelta: {x: -10.24, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &910000021
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 910000022}
+  - component: {fileID: 910000023}
+  m_Layer: 0
+  m_Name: StagePlaySceneController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &910000022
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 910000021}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &910000023
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 910000021}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1a2a3a4b1b2c3d4e5f678901234aa0c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StagePlaySceneController
+  puzzleController: {fileID: 1663782064}
+  resourceManager: {fileID: 1382288042}
+  stageHud: {fileID: 873961341}
+  backgroundImage: {fileID: 1498373260}
+  bgmPlayer: {fileID: 777777004}
+  retryPopup: {fileID: 0}
+  retryButton: {fileID: 0}
+  retryMessageText: {fileID: 0}
+  retryMessage: "\uC815\uC2E0\uB825\uC774 \uBAA8\uB450 \uC18C\uC9C4\uB418\uC5C8\uC2B5\uB2C8\uB2E4.\n\uB2E4\uC2DC
+    \uB3C4\uC804\uD558\uC2DC\uACA0\uC2B5\uB2C8\uAE4C?"
 --- !u!1 &920744485
 GameObject:
   m_ObjectHideFlags: 0
@@ -3431,8 +3536,21 @@ MonoBehaviour:
   sanityLossForbiddenRune: 15
   sanityLossUndo: 10
   maxRatBlood: 10
-  gameOverSceneName: GameOverScene
-  gameOverDelay: 0.5
+--- !u!4 &1382288043
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1382288041}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -10.07676, y: 4.24666, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1382288044
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3450,21 +3568,6 @@ MonoBehaviour:
   sanityDownClip: {fileID: 8300000, guid: 3a0c3869e43deb84d9848411cb03708b, type: 3}
   sfxMixerGroup: {fileID: 8490083830235158005, guid: ee561146df60fcf41988559993bcce95, type: 2}
   bloodSplatterVolume: 0.35
---- !u!4 &1382288043
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1382288041}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -10.07676, y: 4.24666, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1407653048
 GameObject:
   m_ObjectHideFlags: 0
@@ -4176,8 +4279,9 @@ MonoBehaviour:
   pathEdges: []
   player: {fileID: 624599668}
   resourceManager: {fileID: 1382288042}
+  playerAnimation: {fileID: 624599670}
   bloodCostPerMove: 1
-  moveDuration: 0.35
+  moveDuration: 0.6
   moveEase:
     serializedVersion: 2
     m_Curve:
@@ -5360,55 +5464,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BloodBottleUI
   bloodFillImage: {fileID: 422169146}
   bloodCountText: {fileID: 104321128}
---- !u!1 &910000021
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 910000022}
-  - component: {fileID: 910000023}
-  m_Layer: 0
-  m_Name: StagePlaySceneController
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &910000022
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 910000021}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &910000023
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 910000021}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a1a2a3a4b1b2c3d4e5f678901234aa0c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::StagePlaySceneController
-  puzzleController: {fileID: 1663782064}
-  resourceManager: {fileID: 1382288042}
-  stageHud: {fileID: 873961341}
-  backgroundImage: {fileID: 1498373260}
-  bgmPlayer: {fileID: 777777004}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

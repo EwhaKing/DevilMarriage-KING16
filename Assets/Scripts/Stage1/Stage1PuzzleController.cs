@@ -28,10 +28,11 @@ public class Stage1PuzzleController : MonoBehaviour
     [SerializeField] private RunePathEdge[] pathEdges;
     [SerializeField] private Transform player;
     [SerializeField] private StageResourceManager resourceManager;
+    [SerializeField] private StagePlayerAnimationController playerAnimation;
 
     [Header("Movement")]
     [SerializeField] private int bloodCostPerMove = 1;
-    [SerializeField] private float moveDuration = 0.35f;
+    [SerializeField] private float moveDuration = 0.6f; //임의로 수정
     [SerializeField] private AnimationCurve moveEase = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
 
     [Header("Clear")]
@@ -66,6 +67,10 @@ public class Stage1PuzzleController : MonoBehaviour
 
         if (pathEdges == null || pathEdges.Length == 0)
             pathEdges = GetComponentsInChildren<RunePathEdge>();
+
+        if (playerAnimation == null && player != null)
+            playerAnimation =
+                player.GetComponent<StagePlayerAnimationController>();
 
         foreach (var rune in runes)
             rune.Initialize(this);
@@ -119,6 +124,8 @@ public class Stage1PuzzleController : MonoBehaviour
 
         if (player != null && startRune != null)
             player.position = startRune.WorldPosition;
+        if (playerAnimation != null)
+            playerAnimation.ResetToIdle();
     }
 
     /// <summary>
@@ -285,19 +292,31 @@ public class Stage1PuzzleController : MonoBehaviour
         }
     }
 
-    private IEnumerator MoveToRuneCoroutine(RuneNode target, RunePathEdge edge)
+    private IEnumerator MoveToRuneCoroutine(
+    RuneNode target,
+    RunePathEdge edge)
     {
         _isMoving = true;
 
+        if (playerAnimation != null)
+            playerAnimation.SetMoving(true);
+
         int fromRuneIndex = _currentRuneIndex;
-        var from = player != null ? player.position : GetRune(fromRuneIndex).WorldPosition;
+
+        var from = player != null
+            ? player.position
+            : GetRune(fromRuneIndex).WorldPosition;
+
         var to = target.WorldPosition;
         float elapsed = 0f;
 
         while (elapsed < moveDuration)
         {
             elapsed += Time.deltaTime;
-            float t = moveEase.Evaluate(Mathf.Clamp01(elapsed / moveDuration));
+
+            float t = moveEase.Evaluate(
+                Mathf.Clamp01(elapsed / moveDuration)
+            );
 
             if (player != null)
                 player.position = Vector3.Lerp(from, to, t);
@@ -308,12 +327,16 @@ public class Stage1PuzzleController : MonoBehaviour
         if (player != null)
             player.position = to;
 
+        if (playerAnimation != null)
+            playerAnimation.SetMoving(false);
+
         _currentRuneIndex = target.RuneIndex;
         _visitHistory.Add(target.RuneIndex);
         _lastRuneIndex = fromRuneIndex;
         _lastMoveWasForward = true;
         edge.SetTraversed(true);
         _isMoving = false;
+
         OnForwardMoveCompleted?.Invoke();
 
         if (CheckStageClear())
@@ -324,6 +347,9 @@ public class Stage1PuzzleController : MonoBehaviour
     {
         _isMoving = true;
 
+        if (playerAnimation != null)
+            playerAnimation.SetMoving(true);
+
         int fromRuneIndex = _currentRuneIndex;
         var from = player != null ? player.position : GetRune(fromRuneIndex).WorldPosition;
         var to = target.WorldPosition;
@@ -342,6 +368,11 @@ public class Stage1PuzzleController : MonoBehaviour
 
         if (player != null)
             player.position = to;
+        if (playerAnimation != null)
+        {
+            playerAnimation.SetMoving(false);
+            playerAnimation.PlayDamaged();
+        }
 
         _visitHistory.RemoveAt(_visitHistory.Count - 1);
         _currentRuneIndex = target.RuneIndex;
@@ -355,6 +386,9 @@ public class Stage1PuzzleController : MonoBehaviour
     {
         _isMoving = true;
 
+        if (playerAnimation != null)
+            playerAnimation.SetMoving(true);
+
         int fromRuneIndex = _currentRuneIndex;
         var from = player != null ? player.position : GetRune(fromRuneIndex).WorldPosition;
         var to = target.WorldPosition;
@@ -373,6 +407,11 @@ public class Stage1PuzzleController : MonoBehaviour
 
         if (player != null)
             player.position = to;
+        if (playerAnimation != null)
+        {
+            playerAnimation.SetMoving(false);
+            playerAnimation.PlayDamaged();
+        }
 
         _currentRuneIndex = target.RuneIndex;
         _visitHistory.Add(target.RuneIndex);
