@@ -3,7 +3,25 @@ guid: c1d2e3f4a5b60718293a4b5c6d7e8f05
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - speakerNameText: {instanceID: 0}
+  - dialogueBodyText: {instanceID: 0}
+  - characterImage: {instanceID: 0}
+  - storyImage: {instanceID: 0}
+  - backgroundImage: {instanceID: 0}
+  - continueIcon: {instanceID: 0}
+  - nextButton: {instanceID: 0}
+  - autoButton: {instanceID: 0}
+  - skipButton: {instanceID: 0}
+  - logButton: {instanceID: 0}
+  - settingButton: {instanceID: 0}
+  - portraitDefault: {instanceID: 0}
+  - portraitHappy: {instanceID: 0}
+  - portraitNervous: {instanceID: 0}
+  - advanceSfxClip: {instanceID: 0}
+  - sfxMixerGroup: {instanceID: 0}
+  - dialogueFont: {instanceID: 0}
+  - settingPopup: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
