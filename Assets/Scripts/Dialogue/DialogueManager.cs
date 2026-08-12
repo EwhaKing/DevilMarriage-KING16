@@ -8,6 +8,7 @@ using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using UnityEngine.Audio;
 
 /// <summary>
 /// ScriptableObject 대사를 읽어 화면에 출력하는 공용 대화 관리자입니다.
@@ -58,6 +59,11 @@ public class DialogueManager : MonoBehaviour
     [SerializeField] private float typingSpeed = 0.03f;
     [SerializeField] private float autoDelayAfterLine = 1.2f;
 
+    [Header("효과음")]
+    [SerializeField] private AudioClip advanceSfxClip;
+    [SerializeField] private AudioMixerGroup sfxMixerGroup;
+    [SerializeField] [Range(0f, 1f)] private float advanceSfxVolume = 1f;
+
     [Header("한글 폰트")]
     [Tooltip("비우면 씬의 Noto 폰트 또는 Resources/Fonts 에서 자동으로 찾습니다.")]
     [SerializeField] private TMP_FontAsset dialogueFont;
@@ -94,6 +100,8 @@ public class DialogueManager : MonoBehaviour
     private bool _rushThenFadePending;
     private bool _rushModeActive;
     private bool _protagonistRevealed;
+
+    private AudioSource _sfxSource;
 
     /// <summary>외부 이벤트(이름 입력·암전 등) 대기 중인지</summary>
     public bool IsWaitingForExternalEvent => _waitingForExternalEvent;
@@ -133,6 +141,8 @@ public class DialogueManager : MonoBehaviour
         WireUiButtons();
         DisableYarnComponentsIfAny();
 
+        InitAudioSource();
+
         _currentTypingSpeed = typingSpeed;
         _currentAutoDelay = autoDelayAfterLine;
 
@@ -146,6 +156,18 @@ public class DialogueManager : MonoBehaviour
 
         if (settingPopup != null)
             settingPopup.SetActive(false);
+    }
+
+    private void InitAudioSource()
+    {
+        _sfxSource = gameObject.GetComponent<AudioSource>();
+        if (_sfxSource == null)
+            _sfxSource = gameObject.AddComponent<AudioSource>();
+
+        _sfxSource.playOnAwake = false;
+        _sfxSource.loop = false;
+        if (sfxMixerGroup != null)
+            _sfxSource.outputAudioMixerGroup = sfxMixerGroup;
     }
 
     private void OnDestroy()
@@ -177,6 +199,35 @@ public class DialogueManager : MonoBehaviour
 
             HandleAdvanceInput();
         }
+    }
+
+    private void PlayAdvanceSfx()
+    {
+        if (advanceSfxClip == null || _sfxSource == null)
+            return;
+
+        _sfxSource.PlayOneShot(advanceSfxClip, advanceSfxVolume);
+    }
+
+    private void HandleAdvanceInput()
+    {
+        // 로그/설정이 열려 있으면 입력 무시
+        if ((_logPanelRoot != null && _logPanelRoot.activeSelf) ||
+            (settingPopup != null && settingPopup.activeSelf))
+            return;
+
+        // 대사 넘김 / 즉시 완성을 수행할 때 효과음 재생
+        PlayAdvanceSfx();
+
+        if (_isTyping)
+        {
+            // 타이핑 중 클릭 → 문장 즉시 완성
+            CompleteTypingImmediately();
+            return;
+        }
+
+        if (_lineFullyShown)
+            AdvanceToNextLine();
     }
 
     /// <summary>
@@ -303,24 +354,6 @@ public class DialogueManager : MonoBehaviour
     {
         if (popup != null)
             settingPopup = popup;
-    }
-
-    private void HandleAdvanceInput()
-    {
-        // 로그/설정이 열려 있으면 입력 무시
-        if ((_logPanelRoot != null && _logPanelRoot.activeSelf) ||
-            (settingPopup != null && settingPopup.activeSelf))
-            return;
-
-        if (_isTyping)
-        {
-            // 타이핑 중 클릭 → 문장 즉시 완성
-            CompleteTypingImmediately();
-            return;
-        }
-
-        if (_lineFullyShown)
-            AdvanceToNextLine();
     }
 
     private void ShowCurrentLine()

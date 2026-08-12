@@ -1692,6 +1692,9 @@ MonoBehaviour:
     sprite: {fileID: 535582109443181164, guid: 2a7d3423518e5de459f30da2eab1663a, type: 3}
   typingSpeed: 0.03
   autoDelayAfterLine: 1.2
+  advanceSfxClip: {fileID: 8300000, guid: 1e7dc66873327f345ae32c6b10ff7a97, type: 3}
+  sfxMixerGroup: {fileID: 8490083830235158005, guid: ee561146df60fcf41988559993bcce95, type: 2}
+  advanceSfxVolume: 1
   dialogueFont: {fileID: 11400000, guid: af0a9d171e1c29048a7ecbd1dcb08ffd, type: 2}
   settingPopup: {fileID: 0}
   onDialogueFinished:
