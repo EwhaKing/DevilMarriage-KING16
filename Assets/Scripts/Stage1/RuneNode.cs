@@ -7,6 +7,7 @@ public class RuneNode : MonoBehaviour
     [SerializeField] private bool isStartRune;
     [SerializeField] private bool isMandatory = true;
     [SerializeField] private bool isForbidden;
+    [SerializeField] private bool isSanityHazard;
 
     private Stage1PuzzleController _controller;
     private SpriteRenderer _spriteRenderer;
@@ -19,6 +20,7 @@ public class RuneNode : MonoBehaviour
     public bool IsStartRune => isStartRune;
     public bool IsMandatory => isMandatory;
     public bool IsForbidden => isForbidden;
+    public bool IsSanityHazard => isSanityHazard;
     public Vector3 WorldPosition => transform.position;
 
     public void Initialize(Stage1PuzzleController controller)
@@ -28,6 +30,7 @@ public class RuneNode : MonoBehaviour
         if (_spriteRenderer != null)
             _defaultColor = _spriteRenderer.color;
         _defaultScale = transform.localScale;
+        ApplyHazardVisual();
     }
 
     public void Configure(int index, bool start, bool mandatory, bool forbidden)
@@ -38,13 +41,30 @@ public class RuneNode : MonoBehaviour
         isForbidden = forbidden;
     }
 
+    public void SetSanityHazard(bool enabled)
+    {
+        isSanityHazard = enabled;
+        ApplyHazardVisual();
+    }
+
+    private void ApplyHazardVisual()
+    {
+        if (_spriteRenderer == null)
+            _spriteRenderer = GetComponent<SpriteRenderer>();
+        if (_spriteRenderer == null)
+            return;
+
+        _spriteRenderer.color = isSanityHazard
+            ? new Color(0.75f, 0.35f, 0.95f, 1f)
+            : _defaultColor;
+    }
+
     public void SetHighlight(bool enabled)
     {
         _highlighted = enabled;
         if (!enabled)
         {
-            if (_spriteRenderer != null)
-                _spriteRenderer.color = _defaultColor;
+            ApplyHazardVisual();
             transform.localScale = _defaultScale;
         }
     }

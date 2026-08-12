@@ -54,6 +54,9 @@ public class StagePlaySceneController : MonoBehaviour
         var stage = GameFlowManager.Instance != null ? GameFlowManager.Instance.CurrentStage : null;
         if (stage != null && stage.stageNumber == 1 && GetComponent<Stage1PlayTutorialController>() == null)
             gameObject.AddComponent<Stage1PlayTutorialController>();
+
+        if (stage != null && stage.stageNumber == 4 && GetComponent<Stage4PlayIntroController>() == null)
+            gameObject.AddComponent<Stage4PlayIntroController>();
     }
 
     private void OnDestroy()
@@ -114,7 +117,12 @@ public class StagePlaySceneController : MonoBehaviour
         }
 
         if (puzzleController != null)
+        {
             puzzleController.RestartStage();
+            var stageNum = stage != null ? stage.stageNumber : 0;
+            if (stageNum == 4)
+                puzzleController.ConfigureSanityHazardsForStage4();
+        }
     }
 
     private void EnsureRetryPopup()

@@ -4,7 +4,7 @@ using UnityEditor;
 using UnityEngine;
 
 /// <summary>
-/// Stage 1~3용 StageData / StagePlayData / StageDatabase를 생성하거나 갱신합니다.
+/// Stage 1~4용 StageData / StagePlayData / StageDatabase를 생성하거나 갱신합니다.
 /// </summary>
 public static class StageDataAssetCreator
 {
@@ -14,8 +14,8 @@ public static class StageDataAssetCreator
     private const string DialogueFolder = "Assets/Data/Dialogue";
     private const string ResourcesFolder = "Assets/Resources";
 
-    [MenuItem("DevilMarriage/Create Stage 1-3 Data")]
-    [MenuItem("Tools/DevilMarriage/Create Stage 1-3 Data")]
+    [MenuItem("DevilMarriage/Create Stage 1-4 Data")]
+    [MenuItem("Tools/DevilMarriage/Create Stage 1-4 Data")]
     public static void CreateStageDataAssets()
     {
         EnsureFolder(DataRoot);
@@ -29,14 +29,17 @@ public static class StageDataAssetCreator
         var playData1 = CreateOrLoadPlayData("Stage01_PlayData", "1-1", "의식의 시작");
         var playData2 = CreateOrLoadPlayData("Stage02_PlayData", "1-2", "임시 스테이지 2");
         var playData3 = CreateOrLoadPlayData("Stage03_PlayData", "1-3", "임시 스테이지 3");
+        var playData4 = CreateOrLoadPlayData("Stage04_PlayData", "1-4", "마계의 좌표");
 
         var dialogue1 = AssetDatabase.LoadAssetAtPath<StageDialogueData>($"{DialogueFolder}/Stage01_DialogueData.asset");
         var dialogue2 = AssetDatabase.LoadAssetAtPath<StageDialogueData>($"{DialogueFolder}/Stage02_DialogueData.asset");
         var dialogue3 = AssetDatabase.LoadAssetAtPath<StageDialogueData>($"{DialogueFolder}/Stage03_DialogueData.asset");
+        var dialogue4 = AssetDatabase.LoadAssetAtPath<StageDialogueData>($"{DialogueFolder}/Stage04_DialogueData.asset");
 
         var stage1 = CreateOrLoadStageData("Stage01_Data", 1, "의식의 시작", dialogue1, playData1, background, stageBgm);
         var stage2 = CreateOrLoadStageData("Stage02_Data", 2, "임시 스테이지 2", dialogue2, playData2, background, stageBgm);
         var stage3 = CreateOrLoadStageData("Stage03_Data", 3, "임시 스테이지 3", dialogue3, playData3, background, stageBgm);
+        var stage4 = CreateOrLoadStageData("Stage04_Data", 4, "마계의 좌표", dialogue4, playData4, background, stageBgm);
 
         var databasePath = $"{DataRoot}/StageDatabase.asset";
         var database = AssetDatabase.LoadAssetAtPath<StageDatabase>(databasePath);
@@ -46,7 +49,7 @@ public static class StageDataAssetCreator
             AssetDatabase.CreateAsset(database, databasePath);
         }
 
-        SetDatabaseStages(database, stage1, stage2, stage3);
+        SetDatabaseStages(database, stage1, stage2, stage3, stage4);
 
         var resourcesDatabasePath = $"{ResourcesFolder}/StageDatabase.asset";
         var resourcesDatabase = AssetDatabase.LoadAssetAtPath<StageDatabase>(resourcesDatabasePath);
@@ -56,11 +59,11 @@ public static class StageDataAssetCreator
             AssetDatabase.CreateAsset(resourcesDatabase, resourcesDatabasePath);
         }
 
-        SetDatabaseStages(resourcesDatabase, stage1, stage2, stage3);
+        SetDatabaseStages(resourcesDatabase, stage1, stage2, stage3, stage4);
 
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
-        Debug.Log("[StageDataAssetCreator] Stage 1~3 데이터 생성 완료. 대화 데이터가 없다면 DevilMarriage/Create Dialogue Data 도 실행하세요.");
+        Debug.Log("[StageDataAssetCreator] Stage 1~4 데이터 생성 완료. 대화 데이터가 없다면 DevilMarriage/Create Dialogue Data 도 실행하세요.");
     }
 
     private static void SetDatabaseStages(StageDatabase database, params StageData[] stages)

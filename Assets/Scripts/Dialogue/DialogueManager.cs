@@ -515,30 +515,86 @@ public class DialogueManager : MonoBehaviour
         if (speakerNameText != null)
             speakerNameText.text = displaySpeaker;
 
-        if (IsProtagonistSpeaker(rawSpeaker) || IsProtagonistSpeaker(displaySpeaker))
+        bool isNarration = IsNarrationSpeaker(rawSpeaker);
+        bool isProtagonist = IsProtagonistSpeaker(rawSpeaker) || IsProtagonistSpeaker(displaySpeaker);
+
+        if (isProtagonist)
             RevealProtagonist();
+        else if (!isNarration && ResolveNpcSpeakerSprite(rawSpeaker) != null)
+            ShowCharacterPortrait();
         else if (!_protagonistRevealed)
             ApplyProtagonistPresentation(false);
 
         if (backgroundImage != null && line.backgroundImage != null)
             backgroundImage.sprite = line.backgroundImage;
 
-        if (characterImage != null && _protagonistRevealed)
+        if (characterImage == null || isNarration)
+            return;
+
+        if (!_protagonistRevealed && !isProtagonist)
+            ShowCharacterPortrait();
+
+        Sprite sprite = line.characterSprite;
+
+        if (isProtagonist)
         {
-            Sprite sprite = line.characterSprite;
-            // expressionId가 비어 있으면 이전 표정 유지
-            if (sprite == null && !string.IsNullOrWhiteSpace(line.expressionId))
-                _expressionMap.TryGetValue(line.expressionId, out sprite);
+            // NPC → 주인공으로 돌아올 때 반드시 주인공 스프라이트로 복구
+            string expressionKey = string.IsNullOrWhiteSpace(line.expressionId)
+                ? "default"
+                : line.expressionId.Trim();
 
-            if (sprite != null)
-            {
-                characterImage.sprite = sprite;
-                characterImage.enabled = true;
-            }
-
-            if (adjustCharacterPositionFromData)
-                ApplyCharacterPosition(line.characterPosition);
+            if (sprite == null)
+                _expressionMap.TryGetValue(expressionKey, out sprite);
+            if (sprite == null)
+                sprite = portraitDefault;
         }
+        else if (sprite == null)
+        {
+            sprite = ResolveNpcSpeakerSprite(rawSpeaker);
+        }
+
+        if (sprite != null)
+        {
+            characterImage.sprite = sprite;
+            characterImage.enabled = true;
+        }
+
+        if (adjustCharacterPositionFromData)
+            ApplyCharacterPosition(line.characterPosition);
+    }
+
+    private void ShowCharacterPortrait()
+    {
+        ResolveStoryImage();
+        if (storyImage != null)
+        {
+            storyImage.gameObject.SetActive(false);
+            storyImage.enabled = false;
+        }
+
+        if (characterImage != null)
+        {
+            characterImage.gameObject.SetActive(true);
+            characterImage.enabled = true;
+        }
+    }
+
+    private SpeakerPortraitLibrary _speakerPortraits;
+
+    private Sprite ResolveNpcSpeakerSprite(string speaker)
+    {
+        if (_speakerPortraits == null)
+            _speakerPortraits = Resources.Load<SpeakerPortraitLibrary>("SpeakerPortraits");
+
+        return _speakerPortraits != null ? _speakerPortraits.Resolve(speaker) : null;
+    }
+
+    private static bool IsNarrationSpeaker(string speaker)
+    {
+        if (string.IsNullOrWhiteSpace(speaker))
+            return true;
+
+        return speaker == "나레이션" || speaker == "해설" || speaker == "Narration";
     }
 
     private void ApplyCharacterPosition(CharacterPosition position)
@@ -571,14 +627,12 @@ public class DialogueManager : MonoBehaviour
         if (string.IsNullOrEmpty(raw))
             return "";
 
-        // 플레이어 이름 치환 (여러 표기 지원)
         var name = PlayerNameManager.PlayerName;
         var formatted = raw
             .Replace("{$playerName}", name)
             .Replace("{playerName}", name)
             .Replace("[주인공]", name);
 
-        // TMP 폰트에 U+2026(…) 글리프가 없어 점이 빠져 보이는 문제 → ASCII 마침표로 치환
         return formatted.Replace("\u2026", "...");
     }
 

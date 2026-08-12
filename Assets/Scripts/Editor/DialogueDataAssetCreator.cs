@@ -14,8 +14,8 @@ public static class DialogueDataAssetCreator
     private const string StagesFolder = "Assets/Data/Stages";
 
     // 상단 메뉴바 File 옆에 뜨는 DevilMarriage / Tools 양쪽에서 실행할 수 있게 합니다.
-    [MenuItem("DevilMarriage/Create Dialogue Data (Stage 1-3 + Prologue)")]
-    [MenuItem("Tools/DevilMarriage/Create Dialogue Data (Stage 1-3 + Prologue)")]
+    [MenuItem("DevilMarriage/Create Dialogue Data (Stage 1-4 + Prologue)")]
+    [MenuItem("Tools/DevilMarriage/Create Dialogue Data (Stage 1-4 + Prologue)")]
     public static void CreateAllDialogueData()
     {
         EnsureFolder("Assets/Data");
@@ -26,10 +26,12 @@ public static class DialogueDataAssetCreator
         var stage1 = CreateStageDialogue(1);
         var stage2 = CreateStageDialogue(2);
         var stage3 = CreateStageDialogue(3);
+        var stage4 = CreateStageDialogue(4);
 
         LinkStageData(1, stage1);
         LinkStageData(2, stage2);
         LinkStageData(3, stage3);
+        LinkStageData(4, stage4);
 
         var resourcesPath = $"{ResourcesFolder}/PrologueDialogueData.asset";
         var resourcesPrologue = AssetDatabase.LoadAssetAtPath<PrologueDialogueData>(resourcesPath);
@@ -46,7 +48,7 @@ public static class DialogueDataAssetCreator
 
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
-        Debug.Log("[DialogueDataAssetCreator] 프롤로그 + Stage 1~3 대화 데이터 생성/갱신 완료.");
+        Debug.Log("[DialogueDataAssetCreator] 프롤로그 + Stage 1~4 대화 데이터 생성/갱신 완료.");
     }
 
     private static PrologueDialogueData CreatePrologueData()

@@ -137,6 +137,37 @@ public class Stage1PuzzleController : MonoBehaviour
         InitializeStage();
     }
 
+    /// <summary>
+    /// Stage4: 시작 룬을 제외한 일부 룬을 정신력 감소 돌로 표시합니다.
+    /// </summary>
+    public void ConfigureSanityHazardsForStage4()
+    {
+        if (runes == null)
+            return;
+
+        foreach (var rune in runes)
+        {
+            if (rune == null)
+                continue;
+
+            // 시작점이 아닌 홀수 인덱스 룬을 특수 돌로 사용 (Stage1 보드 재사용)
+            bool hazard = !rune.IsStartRune && (rune.RuneIndex % 2 == 1);
+            rune.SetSanityHazard(hazard);
+        }
+    }
+
+    public void ClearSanityHazards()
+    {
+        if (runes == null)
+            return;
+
+        foreach (var rune in runes)
+        {
+            if (rune != null)
+                rune.SetSanityHazard(false);
+        }
+    }
+
     public void HandleRuneClicked(RuneNode target)
     {
         OnRuneClicked?.Invoke(target);
@@ -336,6 +367,9 @@ public class Stage1PuzzleController : MonoBehaviour
         _lastMoveWasForward = true;
         edge.SetTraversed(true);
         _isMoving = false;
+
+        if (target.IsSanityHazard && resourceManager != null)
+            resourceManager.OnSanityHazard();
 
         OnForwardMoveCompleted?.Invoke();
 

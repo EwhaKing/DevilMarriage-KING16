@@ -1,0 +1,16 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1a2a3a4b1b2c3d4e5f678901234aa30, type: 3}
+  m_Name: SpeakerPortraits
+  m_EditorClassIdentifier: Assembly-CSharp::SpeakerPortraitLibrary
+  lucia: {fileID: -8393916796070753658, guid: d95b4f0ff4da3344ea51dac1b9c40471, type: 3}
+  rockDefault: {fileID: -4247750706010559521, guid: fe0c87116abd89749a4d9098247ddd04, type: 3}

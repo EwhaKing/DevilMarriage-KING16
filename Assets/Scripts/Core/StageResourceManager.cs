@@ -120,6 +120,12 @@ public class StageResourceManager : MonoBehaviour
         ReduceSanity(sanityLossForbiddenRune);
     }
 
+    /// <summary>좌표 소환용 특수 돌을 밟았을 때 정신력 감소.</summary>
+    public void OnSanityHazard()
+    {
+        ReduceSanity(sanityLossForbiddenRune);
+    }
+
     public void OnUndo()
     {
         ReduceSanity(sanityLossUndo);

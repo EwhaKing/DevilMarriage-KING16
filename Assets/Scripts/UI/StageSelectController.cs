@@ -15,11 +15,10 @@ public class StageSelectButtonEntry
 public class StageSelectController : MonoBehaviour
 {
     /// <summary>
-    /// 실제로 StartStage로 진입 가능한 스테이지 수.
-    /// 현재는 Stage 1만 플레이 흐름이 구현되어 있습니다.
-    /// Stage 2는 해금·선택 표시만 하고, 클릭 시에는 아직 진행하지 않습니다.
+    /// 실제로 StartStage로 진입 가능한 스테이지 수 (1~5).
+    /// Stage 6는 해금만 하고 플레이는 이후 구현.
     /// </summary>
-    public const int PlayableStageCount = 1;
+    public const int PlayableStageCount = 5;
 
     [Header("Stage Buttons")]
     [SerializeField] private StageSelectButtonEntry[] stageButtons;
@@ -28,7 +27,7 @@ public class StageSelectController : MonoBehaviour
     [SerializeField] private GameObject endOfContentPopup;
     [SerializeField] private TextMeshProUGUI endOfContentText;
     [SerializeField] private string endOfContentMessage =
-        "Current content ends at Stage 1-3.\nPlease wait for future updates.";
+        "Stage 6는 아직 준비 중입니다.\n클리어한 Stage 1~5는 다시 플레이할 수 있습니다.";
 
     [Header("Settings")]
     [SerializeField] private GameObject settingPopup;
@@ -151,7 +150,7 @@ public class StageSelectController : MonoBehaviour
             bool isUnlocked = StageProgressManager.IsStageUnlocked(entry.stageNumber);
             bool isCleared = StageProgressManager.IsStageCleared(entry.stageNumber);
 
-            // Stage 2/3도 해금되면 버튼은 눌러볼 수 있게 둡니다.
+            // Stage 2~5도 해금되면 버튼은 눌러볼 수 있게 둡니다.
             // (실제 스테이지 시작은 OnStageButtonClicked에서 PlayableStageCount로 제한)
             if (entry.button != null)
                 entry.button.interactable = isUnlocked;
@@ -167,15 +166,14 @@ public class StageSelectController : MonoBehaviour
                     : $"Stage {entry.stageNumber}";
 
                 if (isCleared)
-                    title += "\n(CLEAR)";
+                    title += "\n(CLEAR · 재도전 가능)";
 
                 entry.labelText.text = title;
             }
         }
 
-        // Stage 1~3 전체를 다 깬 뒤에만 end-of-content (지금은 Stage1만 플레이 가능해도 팝업 안 띄움)
-        if (StageProgressManager.HasCompletedAllImplementedStages())
-            ShowEndOfContentPopup();
+        // 전체 클리어 후에도 스테이지 선택/재도전은 막지 않습니다.
+        // (미구현 스테이지 클릭 시에만 안내 팝업을 띄웁니다.)
     }
 
     private void OnStageButtonClicked(int stageNumber)
@@ -183,10 +181,10 @@ public class StageSelectController : MonoBehaviour
         if (!StageProgressManager.IsStageUnlocked(stageNumber))
             return;
 
-        // 이번 범위: Stage 1만 실제 진행. Stage 2는 해금 확인용으로만 선택 가능.
+        // 클리어한 스테이지도 다시 플레이 가능
         if (stageNumber > PlayableStageCount)
         {
-            Debug.Log($"[StageSelect] Stage {stageNumber}는 해금됐지만, 아직 플레이 흐름은 구현되지 않았습니다.");
+            ShowEndOfContentPopup();
             return;
         }
 
