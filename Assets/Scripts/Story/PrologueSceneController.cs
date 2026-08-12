@@ -151,7 +151,8 @@ public class PrologueSceneController : MonoBehaviour
 
     private void OnNarrationFinished()
     {
-        if (_handlingPraiseFade)
+        // 암전 코루틴이 방 장면으로 넘기는 중이면 여기서 중복 처리하지 않음
+        if (_handlingPraiseFade && !_playingRoomPart)
             return;
 
         if (_playingRoomPart)
@@ -205,8 +206,26 @@ public class PrologueSceneController : MonoBehaviour
             bgmPlayer.FadeToVolume(0f, praiseBgmFadeDuration);
 
         // 대사가 빨리 출력되고 끝난 뒤 외부 대기를 걸 때까지 기다림
+        // (스킵 등으로 대기 플래그가 늦게 세워져도 줄이 끝났으면 진행)
+        float waitElapsed = 0f;
+        const float waitTimeout = 8f;
         while (dialogueManager != null && !dialogueManager.IsWaitingForExternalEvent)
+        {
+            if (!dialogueManager.IsPlaying)
+                break;
+
+            if (dialogueManager.IsRushThenFadePending && dialogueManager.IsLineFullyShown)
+                break;
+
+            waitElapsed += Time.unscaledDeltaTime;
+            if (waitElapsed >= waitTimeout)
+            {
+                Debug.LogWarning("[Prologue] AcceleratePraiseThenFade 대기 시간 초과 — 암전으로 진행합니다.");
+                break;
+            }
+
             yield return null;
+        }
 
         yield return new WaitForSecondsRealtime(0.25f);
 

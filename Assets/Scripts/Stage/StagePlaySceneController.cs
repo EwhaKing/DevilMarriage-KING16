@@ -2,6 +2,10 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// StagePlayScene 진입 시 현재 스테이지의 Puzzle Prefab을 생성하고,
+/// HUD·리소스·튜토리얼을 연결합니다.
+/// </summary>
 public class StagePlaySceneController : MonoBehaviour
 {
     [SerializeField] private Stage1PuzzleController puzzleController;
@@ -10,17 +14,25 @@ public class StagePlaySceneController : MonoBehaviour
     [SerializeField] private Image backgroundImage;
     [SerializeField] private StageBgmPlayer bgmPlayer;
 
+    [Header("Puzzle Spawn")]
+    [Tooltip("씬에 미리 배치된 기본 퍼즐(없으면 자동 탐색). Prefab이 지정되면 비활성화됩니다.")]
+    [SerializeField] private GameObject defaultPuzzleRoot;
+
+    [Tooltip("퍼즐 Prefab이 생성될 부모. 비우면 씬 루트.")]
+    [SerializeField] private Transform puzzleSpawnParent;
+
     [Header("Retry UI")]
     [SerializeField] private GameObject retryPopup;
     [SerializeField] private Button retryButton;
     [SerializeField] private TextMeshProUGUI retryMessageText;
     [SerializeField] private string retryMessage = "정신력이 모두 소진되었습니다.\n다시 도전하시겠습니까?";
 
+    private GameObject _spawnedPuzzle;
+    private Transform _playerTransform;
+    private StagePlayerAnimationController _playerAnimation;
+
     private void Awake()
     {
-        if (puzzleController == null)
-            puzzleController = FindAnyObjectByType<Stage1PuzzleController>();
-
         if (resourceManager == null)
             resourceManager = FindAnyObjectByType<StageResourceManager>();
 
@@ -29,6 +41,19 @@ public class StagePlaySceneController : MonoBehaviour
 
         if (bgmPlayer == null)
             bgmPlayer = FindAnyObjectByType<StageBgmPlayer>();
+
+        if (defaultPuzzleRoot == null)
+        {
+            var existing = FindAnyObjectByType<Stage1PuzzleController>();
+            if (existing != null)
+                defaultPuzzleRoot = existing.gameObject;
+        }
+
+        CachePlayer();
+        SpawnPuzzleForCurrentStage();
+
+        if (puzzleController == null)
+            puzzleController = FindAnyObjectByType<Stage1PuzzleController>();
     }
 
     private void Start()
@@ -57,12 +82,76 @@ public class StagePlaySceneController : MonoBehaviour
 
         if (stage != null && stage.stageNumber == 4 && GetComponent<Stage4PlayIntroController>() == null)
             gameObject.AddComponent<Stage4PlayIntroController>();
+
+        if (stage != null && stage.stageNumber == 10 && GetComponent<Stage10PlayIntroController>() == null)
+            gameObject.AddComponent<Stage10PlayIntroController>();
     }
 
     private void OnDestroy()
     {
         if (resourceManager != null)
             resourceManager.OnGameOver -= ShowRetryPopup;
+    }
+
+    private void CachePlayer()
+    {
+        var playerObject = GameObject.Find("Player");
+        if (playerObject != null)
+        {
+            _playerTransform = playerObject.transform;
+            _playerAnimation = playerObject.GetComponent<StagePlayerAnimationController>();
+        }
+    }
+
+    /// <summary>
+    /// StagePlayData.puzzlePrefab이 있으면 해당 Prefab만 생성하고,
+    /// 씬 기본 퍼즐은 끕니다. Prefab이 없으면 씬 기본 퍼즐을 그대로 씁니다.
+    /// </summary>
+    private void SpawnPuzzleForCurrentStage()
+    {
+        var stage = GameFlowManager.Instance != null ? GameFlowManager.Instance.CurrentStage : null;
+        var playData = stage != null ? stage.playData : null;
+        var prefab = playData != null ? playData.puzzlePrefab : null;
+
+        if (prefab == null)
+        {
+            Debug.LogWarning(
+                $"[StagePlay] Stage {(stage != null ? stage.stageNumber.ToString() : "?")} PlayData에 Puzzle Prefab이 없습니다. " +
+                "씬 기본 Stage1Puzzle을 사용합니다. Assets/Data/PlayData 에서 Puzzle Prefab을 연결하세요.");
+
+            if (defaultPuzzleRoot != null)
+                defaultPuzzleRoot.SetActive(true);
+
+            puzzleController = defaultPuzzleRoot != null
+                ? defaultPuzzleRoot.GetComponent<Stage1PuzzleController>()
+                : FindAnyObjectByType<Stage1PuzzleController>();
+
+            if (puzzleController != null)
+                puzzleController.BindExternalReferences(_playerTransform, resourceManager, _playerAnimation);
+
+            return;
+        }
+
+        if (defaultPuzzleRoot != null)
+            defaultPuzzleRoot.SetActive(false);
+
+        if (_spawnedPuzzle != null)
+            Destroy(_spawnedPuzzle);
+
+        _spawnedPuzzle = Instantiate(prefab, puzzleSpawnParent);
+        _spawnedPuzzle.name = prefab.name;
+        puzzleController = _spawnedPuzzle.GetComponent<Stage1PuzzleController>();
+        if (puzzleController == null)
+            puzzleController = _spawnedPuzzle.GetComponentInChildren<Stage1PuzzleController>();
+
+        if (puzzleController == null)
+        {
+            Debug.LogError($"[StagePlay] Prefab '{prefab.name}'에 Stage1PuzzleController가 없습니다.", prefab);
+            return;
+        }
+
+        puzzleController.BindExternalReferences(_playerTransform, resourceManager, _playerAnimation);
+        puzzleController.RefreshRuneAndEdgeCache();
     }
 
     private void ApplyCurrentStageData()
@@ -86,6 +175,9 @@ public class StagePlaySceneController : MonoBehaviour
 
         if (resourceManager != null)
             resourceManager.ApplyPlayData(playData);
+
+        if (puzzleController != null)
+            puzzleController.ApplyPlaySettings(playData);
     }
 
     private void ShowRetryPopup()

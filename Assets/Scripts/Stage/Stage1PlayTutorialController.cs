@@ -36,7 +36,12 @@ public class Stage1PlayTutorialController : MonoBehaviour
             puzzleController = FindAnyObjectByType<Stage1PuzzleController>();
 
         if (runes == null || runes.Length == 0)
-            runes = FindObjectsByType<RuneNode>(FindObjectsSortMode.None);
+        {
+            if (puzzleController != null && puzzleController.Runes != null && puzzleController.Runes.Length > 0)
+                runes = puzzleController.Runes;
+            else
+                runes = FindObjectsByType<RuneNode>(FindObjectsSortMode.None);
+        }
 
         if (puzzleController != null)
         {

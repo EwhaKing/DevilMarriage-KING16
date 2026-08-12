@@ -5,8 +5,8 @@ using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 /// <summary>
-/// Stage4 PlayScene: 좌표 소환 안내 대사 + 정신력 특수 돌 설정.
-/// (플레이 보드는 Stage1과 동일한 StagePlayScene을 재사용합니다.)
+/// Stage4 PlayScene: 반지 전달 연습 직전 짧은 안내.
+/// (본편 스토리는 StoryScene Open에서 이미 진행됩니다.)
 /// </summary>
 public class Stage4PlayIntroController : MonoBehaviour
 {
@@ -29,6 +29,7 @@ public class Stage4PlayIntroController : MonoBehaviour
         if (puzzleController == null)
             puzzleController = FindAnyObjectByType<Stage1PuzzleController>();
 
+        // Prefab에 Hazard가 없으면 기존 보드 기준 폴백 배치
         if (puzzleController != null)
             puzzleController.ConfigureSanityHazardsForStage4();
 
@@ -42,9 +43,9 @@ public class Stage4PlayIntroController : MonoBehaviour
 
         yield return ShowDialogue(new[]
         {
-            "주인공|책에 따르면 정확한 마계의 좌표 소환 대상을 소환하기 위해선 특별한 돌이 필요해. 대신 이 돌은 밟을 수록 정신력이 깎여나갈테니 조심해.",
-            "루시아|하지만 그것 말고는 동일하게 결국 이번에도 모든 룬을 이어 맞추면 될 거야.",
-            "일렉|키보드의 주소는 내가 불러주지!"
+            "루시아|간식을 놓아 링베어러의 이동을 유도해. 장애물에 부딪히면 반지가 떨어질 수 있으니까 조심하고.",
+            "주인공|제한 시간 안에 반지를 떨어뜨리지 않고 도착하면 성공이야. 알았지, 링베어러?",
+            "링베어러|먕!"
         });
 
         if (puzzleController != null)

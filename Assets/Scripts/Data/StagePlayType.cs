@@ -1,4 +1,5 @@
 public enum StagePlayType
 {
-    PentagramPuzzle
+    PentagramPuzzle = 0,
+    OneStrokePuzzle = 1
 }

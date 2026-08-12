@@ -8,15 +8,18 @@ using UnityEngine;
 [Serializable]
 public class DialogueLine
 {
-    [Tooltip("화면에 표시할 화자 이름 (예: 주인공, 나레이션, 엄마)")]
+    [Tooltip("화면에 표시할 화자 이름 (예: 주인공, 나레이션, 루시아, 마수)")]
     public string speakerName = "";
 
     [Tooltip("실제로 출력할 대사 문장입니다. 여러 줄로 적어도 됩니다.")]
     [TextArea(2, 6)]
     public string dialogueText = "";
 
-    [Tooltip("이 줄에서 보여줄 캐릭터 스프라이트 (비워두면 이전 이미지를 유지)")]
+    [Tooltip("주인공 표정 스프라이트 오버라이드 (비우면 expressionId / 기본 표정 사용)")]
     public Sprite characterSprite;
+
+    [Tooltip("이 줄에서 보여줄 NPC 스프라이트. 비우면 SpeakerPortraits에서 찾거나 직전 NPC를 유지합니다.")]
+    public Sprite npcSprite;
 
     [Tooltip("표정 ID. 비우면 이전 표정 유지.\n예: default, wake, nervous, dark, angry, cry, sparkle, scheming, happy")]
     public string expressionId = "";

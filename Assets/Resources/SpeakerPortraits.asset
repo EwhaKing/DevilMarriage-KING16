@@ -14,3 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SpeakerPortraitLibrary
   lucia: {fileID: -8393916796070753658, guid: d95b4f0ff4da3344ea51dac1b9c40471, type: 3}
   rockDefault: {fileID: -4247750706010559521, guid: fe0c87116abd89749a4d9098247ddd04, type: 3}
+  ringBearer: {fileID: 3729145687137531614, guid: 6c1d6e74e3a3eae4f9b00b1c44c78197, type: 3}
+  keyboard: {fileID: -3676571329350590026, guid: b3e6643dcf83cca4fb61cc702672071c, type: 3}
+  drum: {fileID: -4819397385978723362, guid: 7388c702b38aeff45a01d911d4688c1c, type: 3}
+  belian: {fileID: -6557209856017570972, guid: 849e48ac45f11764e9fbc71a5f7a348d, type: 3}

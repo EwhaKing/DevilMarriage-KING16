@@ -23,6 +23,8 @@ public class DialogueManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI speakerNameText;
     [SerializeField] private TextMeshProUGUI dialogueBodyText;
     [SerializeField] private Image characterImage;
+    [Tooltip("주인공을 제외한 NPC 공용 이미지. 비우면 씬의 NPCSprite를 찾습니다.")]
+    [SerializeField] private Image npcImage;
     [Tooltip("주인공 등장 전 스토리/나레이션용 이미지. 없으면 CharacterSprite만 사용합니다.")]
     [SerializeField] private Image storyImage;
     [SerializeField] private Image backgroundImage;
@@ -71,6 +73,12 @@ public class DialogueManager : MonoBehaviour
     [Header("설정 팝업 (기존 SoundSettings 연결)")]
     [SerializeField] private GameObject settingPopup;
 
+    [Header("화자 밝기")]
+    [Tooltip("현재 말하는 쪽 색상 (알파 1 유지)")]
+    [SerializeField] private Color activeSpeakerColor = Color.white;
+    [Tooltip("말하지 않는 쪽 색상. 회색 약 50% (알파 1 유지)")]
+    [SerializeField] private Color inactiveSpeakerColor = new Color(0.5f, 0.5f, 0.5f, 1f);
+
     [Header("이벤트")]
     [Tooltip("대화가 모두 끝났을 때 호출됩니다.")]
     public UnityEvent onDialogueFinished = new UnityEvent();
@@ -85,6 +93,8 @@ public class DialogueManager : MonoBehaviour
     private int _index;
     private bool _isPlaying;
     private bool _isTyping;
+    private Sprite _cachedNpcSprite;
+    private bool _npcPortraitActive;
     private bool _lineFullyShown;
     private bool _autoEnabled;
     private bool _skipRequested;
@@ -108,6 +118,12 @@ public class DialogueManager : MonoBehaviour
 
     /// <summary>현재 줄 타이핑이 끝났는지</summary>
     public bool IsLineFullyShown => _lineFullyShown && !_isTyping;
+
+    /// <summary>대화 재생 중인지</summary>
+    public bool IsPlaying => _isPlaying;
+
+    /// <summary>칭찬 마지막 줄 후 암전 대기 예정인지</summary>
+    public bool IsRushThenFadePending => _rushThenFadePending;
 
     public Sprite PortraitDefault => portraitDefault;
 
@@ -226,6 +242,13 @@ public class DialogueManager : MonoBehaviour
             return;
         }
 
+        // 칭찬 마지막 줄: 다음 줄로 넘기지 않고 암전 대기로 넘긴다
+        if (_rushThenFadePending && _lineFullyShown)
+        {
+            EnterRushThenFadeWait();
+            return;
+        }
+
         if (_lineFullyShown)
             AdvanceToNextLine();
     }
@@ -270,11 +293,16 @@ public class DialogueManager : MonoBehaviour
         _rushModeActive = false;
         _autoEnabled = false;
         _protagonistRevealed = false;
+        _cachedNpcSprite = null;
+        _npcPortraitActive = false;
         _currentTypingSpeed = typingSpeed;
         _currentAutoDelay = autoDelayAfterLine;
         _logEntries.Clear();
 
         ResolveStoryImage();
+        ResolveNpcImage();
+        ResetPortraitColors();
+        HideNpcPortrait(clearSprite: true);
         ApplyProtagonistPresentation(false);
 
         if (_rushCoroutine != null)
@@ -376,7 +404,9 @@ public class DialogueManager : MonoBehaviour
             if (!string.IsNullOrWhiteSpace(line.eventId))
             {
                 HandleEvent(line.eventId);
-                if (!_waitingForExternalEvent && _isPlaying)
+                if (_rushThenFadePending)
+                    EnterRushThenFadeWait();
+                else if (!_waitingForExternalEvent && _isPlaying)
                     AdvanceToNextLine();
             }
             else
@@ -394,6 +424,10 @@ public class DialogueManager : MonoBehaviour
             _lineFullyShown = true;
             if (!string.IsNullOrWhiteSpace(line.eventId))
                 HandleEvent(line.eventId);
+
+            // 스킵으로 즉시 표시된 칭찬 마지막 줄도 암전 대기로 들어가야 함
+            if (_rushThenFadePending)
+                EnterRushThenFadeWait();
             else if (_autoEnabled)
                 RestartAutoTimer();
             return;
@@ -444,8 +478,7 @@ public class DialogueManager : MonoBehaviour
         // 칭찬 가속 후 암전: 다음으로 넘기지 않고 Prologue가 fade 처리할 때까지 대기
         if (_rushThenFadePending)
         {
-            _waitingForExternalEvent = true;
-            SetNextButtonVisible(false);
+            EnterRushThenFadeWait();
             yield break;
         }
 
@@ -467,13 +500,25 @@ public class DialogueManager : MonoBehaviour
 
         if (_rushThenFadePending)
         {
-            _waitingForExternalEvent = true;
-            SetNextButtonVisible(false);
+            EnterRushThenFadeWait();
             return;
         }
 
         if (_autoEnabled)
             RestartAutoTimer();
+    }
+
+    private void EnterRushThenFadeWait()
+    {
+        _rushThenFadePending = true;
+        _waitingForExternalEvent = true;
+        SetNextButtonVisible(false);
+
+        if (_autoCoroutine != null)
+        {
+            StopCoroutine(_autoCoroutine);
+            _autoCoroutine = null;
+        }
     }
 
     private void AdvanceToNextLine()
@@ -542,6 +587,8 @@ public class DialogueManager : MonoBehaviour
 
     private void ApplyVisuals(DialogueLine line)
     {
+        ResolveNpcImage();
+
         string rawSpeaker = line.speakerName ?? "";
         string displaySpeaker = FormatSpeakerName(rawSpeaker);
 
@@ -550,19 +597,108 @@ public class DialogueManager : MonoBehaviour
 
         bool isNarration = IsNarrationSpeaker(rawSpeaker);
         bool isProtagonist = IsProtagonistSpeaker(rawSpeaker) || IsProtagonistSpeaker(displaySpeaker);
+        bool isNpc = !isNarration && !isProtagonist;
+        bool dualPortrait = npcImage != null;
 
         if (isProtagonist)
             RevealProtagonist();
-        else if (!isNarration && ResolveNpcSpeakerSprite(rawSpeaker) != null)
+        else if (isNpc && dualPortrait)
+        {
+            // NPC 발화: 주인공 슬롯은 유지(어두움), StorySprite는 숨김
+            if (_protagonistRevealed)
+                ShowCharacterPortrait();
+            else if (storyImage != null)
+            {
+                storyImage.gameObject.SetActive(false);
+                storyImage.enabled = false;
+            }
+        }
+        else if (isNpc && !dualPortrait)
+        {
+            // 구버전 호환: NPCSprite가 없으면 CharacterSprite에 NPC 표시
             ShowCharacterPortrait();
+        }
         else if (!_protagonistRevealed)
             ApplyProtagonistPresentation(false);
 
         if (backgroundImage != null && line.backgroundImage != null)
             backgroundImage.sprite = line.backgroundImage;
 
+        if (dualPortrait)
+            ApplyDualPortraitVisuals(line, isNarration, isProtagonist, isNpc, rawSpeaker);
+        else
+            ApplyLegacySinglePortraitVisuals(line, isNarration, isProtagonist, rawSpeaker);
+
+        if (adjustCharacterPositionFromData)
+            ApplyCharacterPosition(line.characterPosition);
+    }
+
+    private void ApplyDualPortraitVisuals(
+        DialogueLine line,
+        bool isNarration,
+        bool isProtagonist,
+        bool isNpc,
+        string rawSpeaker)
+    {
+        // 주인공 표정 갱신 (주인공 대사일 때만 표정 변경, 슬롯은 유지)
+        if (isProtagonist)
+        {
+            Sprite protagonistSprite = ResolveProtagonistSprite(line);
+            if (protagonistSprite != null && characterImage != null)
+            {
+                characterImage.sprite = protagonistSprite;
+                characterImage.enabled = true;
+                characterImage.gameObject.SetActive(true);
+            }
+        }
+        else if (_protagonistRevealed && characterImage != null && characterImage.sprite == null)
+        {
+            if (portraitDefault != null)
+                characterImage.sprite = portraitDefault;
+        }
+
+        // NPC 스프라이트 갱신
+        if (isNpc)
+        {
+            Sprite npcSprite = line.npcSprite != null
+                ? line.npcSprite
+                : ResolveNpcSpeakerSprite(rawSpeaker);
+
+            if (npcSprite != null)
+                _cachedNpcSprite = npcSprite;
+
+            if (_cachedNpcSprite != null)
+            {
+                npcImage.sprite = _cachedNpcSprite;
+                npcImage.enabled = true;
+                npcImage.gameObject.SetActive(true);
+                _npcPortraitActive = true;
+            }
+            else
+            {
+                HideNpcPortrait(clearSprite: false);
+            }
+        }
+        else if (isNarration)
+        {
+            // 나레이션: 이미 나온 초상은 유지하고 둘 다 어둡게 (ApplySpeakerDimColors)
+        }
+
+        ApplySpeakerDimColors(isNarration, isProtagonist, isNpc);
+    }
+
+    private void ApplyLegacySinglePortraitVisuals(
+        DialogueLine line,
+        bool isNarration,
+        bool isProtagonist,
+        string rawSpeaker)
+    {
         if (characterImage == null || isNarration)
+        {
+            if (characterImage != null)
+                SetImageColor(characterImage, inactiveSpeakerColor);
             return;
+        }
 
         if (!_protagonistRevealed && !isProtagonist)
             ShowCharacterPortrait();
@@ -571,29 +707,88 @@ public class DialogueManager : MonoBehaviour
 
         if (isProtagonist)
         {
-            // NPC → 주인공으로 돌아올 때 반드시 주인공 스프라이트로 복구
-            string expressionKey = string.IsNullOrWhiteSpace(line.expressionId)
-                ? "default"
-                : line.expressionId.Trim();
-
-            if (sprite == null)
-                _expressionMap.TryGetValue(expressionKey, out sprite);
-            if (sprite == null)
-                sprite = portraitDefault;
+            sprite = ResolveProtagonistSprite(line);
         }
         else if (sprite == null)
         {
-            sprite = ResolveNpcSpeakerSprite(rawSpeaker);
+            sprite = line.npcSprite != null ? line.npcSprite : ResolveNpcSpeakerSprite(rawSpeaker);
         }
 
         if (sprite != null)
         {
             characterImage.sprite = sprite;
             characterImage.enabled = true;
+            characterImage.gameObject.SetActive(true);
         }
 
-        if (adjustCharacterPositionFromData)
-            ApplyCharacterPosition(line.characterPosition);
+        SetImageColor(characterImage, activeSpeakerColor);
+    }
+
+    private Sprite ResolveProtagonistSprite(DialogueLine line)
+    {
+        Sprite sprite = line.characterSprite;
+        string expressionKey = string.IsNullOrWhiteSpace(line.expressionId)
+            ? "default"
+            : line.expressionId.Trim();
+
+        if (sprite == null)
+            _expressionMap.TryGetValue(expressionKey, out sprite);
+        if (sprite == null)
+            sprite = portraitDefault;
+        return sprite;
+    }
+
+    private void ApplySpeakerDimColors(bool isNarration, bool isProtagonist, bool isNpc)
+    {
+        if (characterImage != null && characterImage.gameObject.activeInHierarchy && characterImage.enabled)
+        {
+            if (isNarration)
+                SetImageColor(characterImage, inactiveSpeakerColor);
+            else if (isProtagonist)
+                SetImageColor(characterImage, activeSpeakerColor);
+            else
+                SetImageColor(characterImage, inactiveSpeakerColor);
+        }
+
+        if (npcImage != null && _npcPortraitActive && npcImage.gameObject.activeInHierarchy && npcImage.enabled)
+        {
+            if (isNarration)
+                SetImageColor(npcImage, inactiveSpeakerColor);
+            else if (isNpc)
+                SetImageColor(npcImage, activeSpeakerColor);
+            else
+                SetImageColor(npcImage, inactiveSpeakerColor);
+        }
+    }
+
+    private void SetImageColor(Image image, Color color)
+    {
+        if (image == null)
+            return;
+
+        color.a = 1f;
+        image.color = color;
+    }
+
+    private void ResetPortraitColors()
+    {
+        SetImageColor(characterImage, activeSpeakerColor);
+        SetImageColor(npcImage, activeSpeakerColor);
+    }
+
+    private void HideNpcPortrait(bool clearSprite)
+    {
+        _npcPortraitActive = false;
+        if (clearSprite)
+            _cachedNpcSprite = null;
+
+        if (npcImage == null)
+            return;
+
+        npcImage.enabled = false;
+        npcImage.gameObject.SetActive(false);
+        if (clearSprite)
+            npcImage.sprite = null;
     }
 
     private void ShowCharacterPortrait()
@@ -627,7 +822,7 @@ public class DialogueManager : MonoBehaviour
         if (string.IsNullOrWhiteSpace(speaker))
             return true;
 
-        return speaker == "나레이션" || speaker == "해설" || speaker == "Narration";
+        return speaker == "나레이션" || speaker == "해설" || speaker == "Narration" || speaker == "시스템";
     }
 
     private void ApplyCharacterPosition(CharacterPosition position)
@@ -727,6 +922,16 @@ public class DialogueManager : MonoBehaviour
             storyImage = storyObject.GetComponent<Image>();
     }
 
+    private void ResolveNpcImage()
+    {
+        if (npcImage != null)
+            return;
+
+        var npcObject = GameObject.Find("NPCSprite");
+        if (npcObject != null)
+            npcImage = npcObject.GetComponent<Image>();
+    }
+
     private IEnumerator RushRampCoroutine(float targetTypingSpeed, float targetAutoDelay, float rampDuration)
     {
         float startTyping = _currentTypingSpeed;
@@ -810,10 +1015,26 @@ public class DialogueManager : MonoBehaviour
                 HandleEvent(line.eventId);
                 if (line.eventId == "AcceleratePraiseThenFade")
                 {
-                    _waitingForExternalEvent = true;
-                    SetNextButtonVisible(false);
+                    EnterRushThenFadeWait();
+                    yield break;
                 }
-                yield break;
+
+                // 이름 입력·암전 등 외부 대기가 필요한 이벤트는 끝날 때까지 대기
+                if (_waitingForExternalEvent)
+                {
+                    while (_isPlaying && _waitingForExternalEvent)
+                        yield return null;
+
+                    if (!_isPlaying)
+                        yield break;
+
+                    continue;
+                }
+
+                // AcceleratePraise처럼 대기 없는 이벤트는 다음 줄로 진행
+                AdvanceToNextLine();
+                yield return null;
+                continue;
             }
 
             AdvanceToNextLine();
@@ -980,6 +1201,13 @@ public class DialogueManager : MonoBehaviour
                 characterImage = ch.GetComponent<Image>();
         }
 
+        if (npcImage == null)
+        {
+            var npc = GameObject.Find("NPCSprite");
+            if (npc != null)
+                npcImage = npc.GetComponent<Image>();
+        }
+
         if (storyImage == null)
         {
             var story = GameObject.Find("StorySprite");
@@ -1034,8 +1262,15 @@ public class DialogueManager : MonoBehaviour
                 characterImage = ch.GetComponent<Image>();
         }
 
+        if (npcImage == null)
+        {
+            var npc = GameObject.Find("NPCSprite");
+            if (npc != null)
+                npcImage = npc.GetComponent<Image>();
+        }
+
         // inactive 포함 검색 (Yarn이 이미 꺼진 경우)
-        if (backgroundImage == null || characterImage == null)
+        if (backgroundImage == null || characterImage == null || npcImage == null)
         {
             var images = FindObjectsByType<Image>(FindObjectsInactive.Include, FindObjectsSortMode.None);
             foreach (var img in images)
@@ -1046,11 +1281,14 @@ public class DialogueManager : MonoBehaviour
                     backgroundImage = img;
                 if (characterImage == null && img.gameObject.name == "CharacterSprite")
                     characterImage = img;
+                if (npcImage == null && img.gameObject.name == "NPCSprite")
+                    npcImage = img;
             }
         }
 
         MoveUnderCanvasIfNeeded(backgroundImage != null ? backgroundImage.gameObject : null, canvas, 0);
         MoveUnderCanvasIfNeeded(characterImage != null ? characterImage.gameObject : null, canvas, 1);
+        MoveUnderCanvasIfNeeded(npcImage != null ? npcImage.gameObject : null, canvas, 2);
 
         // SceneChanger 표정이 비어 있으면 가져옴
         if (portraitDefault == null || portraitHappy == null || portraitNervous == null)
