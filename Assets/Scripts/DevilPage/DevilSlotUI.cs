@@ -14,12 +14,25 @@ public class DevilSlotUI : MonoBehaviour
 
     private DevilData currentData;
     private DevilBookManager manager;
+    private Button btn;
 
-    // 매니저에서 이 슬롯을 초기화할 때 부르는 함수
+    private void Awake()
+    {
+        btn = GetComponent<Button>();
+    }
+
     public void SetupSlot(DevilData data, DevilBookManager mgr)
     {
         currentData = data;
         manager = mgr;
+
+        // 버튼 클릭 이벤트 리스너 재설정 (중복 방지 및 확실한 연결)
+        if (btn == null) btn = GetComponent<Button>();
+        if (btn != null)
+        {
+            btn.onClick.RemoveAllListeners();
+            btn.onClick.AddListener(OnClickSlot);
+        }
 
         if (data == null)
         {
@@ -29,7 +42,7 @@ public class DevilSlotUI : MonoBehaviour
 
         gameObject.SetActive(true);
 
-        // 해금 여부에 따른 표시 (null 체크 추가)
+        // 해금 여부에 따른 표시
         if (data.isUnlocked)
         {
             if (iconImage != null) iconImage.sprite = data.portrait;
@@ -42,16 +55,19 @@ public class DevilSlotUI : MonoBehaviour
         }
     }
 
-    // 슬롯(버튼)이 클릭되었을 때 호출할 함수 (Button의 OnClick에 연결)
+    // 슬롯(버튼)이 클릭되었을 때 호출되는 함수
     public void OnClickSlot()
     {
-        if (currentData != null)
+        if (currentData != null && manager != null)
         {
             manager.SelectDevil(currentData, this);
         }
+        else
+        {
+            Debug.LogWarning($"[DevilSlotUI] 클릭 실패! currentData: {(currentData != null ? "있음" : "없음")}, manager: {(manager != null ? "있음" : "없음")}");
+        }
     }
 
-    // 강조 테두리 켜기/끄기
     public void SetHighlight(bool isOn)
     {
         if (highlightObj != null) highlightObj.SetActive(isOn);
