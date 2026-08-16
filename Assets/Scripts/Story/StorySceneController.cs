@@ -73,7 +73,7 @@ public class StorySceneController : MonoBehaviour
         bool isOpening = GameFlowManager.Instance == null || GameFlowManager.Instance.IsOpeningStory;
 
         var stage = GameFlowManager.Instance != null ? GameFlowManager.Instance.CurrentStage : null;
-        if (stage != null && stage.stageNumber >= 3 && stage.stageNumber <= 10)
+        if (stage != null && stage.stageNumber >= 3 && stage.stageNumber <= 33)
             dialogueData = DialogueContentLibrary.CreateStageRuntime(stage.stageNumber);
 
         dialogueManager.StartStageDialogue(dialogueData, isOpening);

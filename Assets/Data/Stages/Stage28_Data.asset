@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1a2a3a4b1b2c3d4e5f678901234aa04, type: 3}
+  m_Name: Stage28_Data
+  m_EditorClassIdentifier: Assembly-CSharp::StageData
+  stageNumber: 28
+  stageName: "\uC560\uC26C \uCD94\uACA9"
+  dialogueData: {fileID: 11400000, guid: 70da443152fe9394eb609e2f41f7f228, type: 2}
+  playData: {fileID: 11400000, guid: b1b2b3b4c1c2d3d4e5f678901234bb28, type: 2}
+  playType: 0
+  playSceneName: StagePlayScene
+  backgroundImage: {fileID: -1420983543074758574, guid: 06faaa3f0a4d3d9418ebb36c736b84b2, type: 3}
+  backgroundMusic: {fileID: 8300000, guid: db09f7eb266586e40b8d4db6cc95825f, type: 3}

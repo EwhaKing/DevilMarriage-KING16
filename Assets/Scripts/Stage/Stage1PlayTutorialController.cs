@@ -111,10 +111,8 @@ public class Stage1PlayTutorialController : MonoBehaviour
 
     private void HandleRuneClicked(RuneNode rune)
     {
-        if (_step == TutorialStep.WaitStartClick && puzzleController.AwaitingStartSelection)
+        if (_step == TutorialStep.WaitStartClick)
         {
-            puzzleController.SelectStartRune(rune);
-            puzzleController.AwaitingStartSelection = false;
             _startSelected = true;
         }
     }

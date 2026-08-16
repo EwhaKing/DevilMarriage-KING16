@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1a2a3a4b1b2c3d4e5f678901234aa03, type: 3}
+  m_Name: Stage15_PlayData
+  m_EditorClassIdentifier: Assembly-CSharp::StagePlayData
+  stageCode: 1-15
+  stageTitle: "\uB9C8\uB825 \uC7AC\uD68C\uC218"
+  maxSanity: 100
+  maxRatBlood: 15
+  bloodCostPerMove: 1
+  puzzlePrefab: {fileID: 2527354083141037581, guid: 0f6051ac9e2cec440bd4ab4dc8ff1840, type: 3}

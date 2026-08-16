@@ -128,6 +128,21 @@ public class Stage1PuzzleController : MonoBehaviour
         BuildEdgeLookup();
     }
 
+    public int CountPaths()
+    {
+        if (pathEdges == null)
+            return 0;
+
+        int count = 0;
+        foreach (var edge in pathEdges)
+        {
+            if (edge != null)
+                count++;
+        }
+
+        return count;
+    }
+
     private static bool HasNullEntries<T>(T[] items) where T : UnityEngine.Object
     {
         if (items == null)
@@ -193,22 +208,14 @@ public class Stage1PuzzleController : MonoBehaviour
     private void InitializeStage()
     {
         _startRuneIndex = -1;
+        _currentRuneIndex = -1;
         _hasExplicitEndRune = false;
 
         foreach (var rune in runes)
         {
-            if (rune == null)
-                continue;
-
-            if (rune.IsStartRune && _startRuneIndex < 0)
-                _startRuneIndex = rune.RuneIndex;
-
-            if (rune.IsEndRune)
+            if (rune != null && rune.IsEndRune)
                 _hasExplicitEndRune = true;
         }
-
-        if (_startRuneIndex < 0 && runes.Length > 0 && runes[0] != null)
-            _startRuneIndex = runes[0].RuneIndex;
 
         foreach (var edge in pathEdges)
         {
@@ -216,29 +223,27 @@ public class Stage1PuzzleController : MonoBehaviour
                 edge.SetTraversed(false);
         }
 
-        var startRune = GetRune(_startRuneIndex);
-        _currentRuneIndex = _startRuneIndex;
-
         _visitHistory.Clear();
-        _visitHistory.Add(_startRuneIndex);
         _visitedRunes.Clear();
-        _visitedRunes.Add(_startRuneIndex);
         _lastRuneIndex = -1;
         _lastMoveWasForward = false;
         _isMoving = false;
         _stageCleared = false;
-        InputLocked = false;
+        AwaitingStartSelection = true;
 
-        if (player != null && startRune != null)
-            player.position = startRune.WorldPosition;
+        if (player != null)
+            player.gameObject.SetActive(false);
         if (playerAnimation != null)
             playerAnimation.ResetToIdle();
+
+        SetAllRuneHighlights(true);
     }
 
     public void RestartStage()
     {
         StopAllCoroutines();
         InitializeStage();
+        InputLocked = false;
     }
 
     /// <summary>
@@ -290,21 +295,26 @@ public class Stage1PuzzleController : MonoBehaviour
 
     public void HandleRuneClicked(RuneNode target)
     {
-        OnRuneClicked?.Invoke(target);
-
-        if (AwaitingStartSelection)
-            return;
-
         if (InputLocked || target == null)
             return;
 
+        if (AwaitingStartSelection)
+        {
+            if (!SelectStartRune(target))
+                return;
+
+            OnRuneClicked?.Invoke(target);
+            return;
+        }
+
+        OnRuneClicked?.Invoke(target);
         TryMoveToRune(target);
     }
 
-    public void SelectStartRune(RuneNode startRune)
+    public bool SelectStartRune(RuneNode startRune)
     {
-        if (startRune == null)
-            return;
+        if (startRune == null || startRune.IsForbidden)
+            return false;
 
         _startRuneIndex = startRune.RuneIndex;
         _currentRuneIndex = _startRuneIndex;
@@ -315,6 +325,7 @@ public class Stage1PuzzleController : MonoBehaviour
         _lastRuneIndex = -1;
         _lastMoveWasForward = false;
         _stageCleared = false;
+        AwaitingStartSelection = false;
 
         foreach (var edge in pathEdges)
         {
@@ -323,7 +334,25 @@ public class Stage1PuzzleController : MonoBehaviour
         }
 
         if (player != null)
+        {
+            player.gameObject.SetActive(true);
             player.position = startRune.WorldPosition;
+        }
+
+        SetAllRuneHighlights(false);
+        return true;
+    }
+
+    public void SetAllRuneHighlights(bool enabled)
+    {
+        if (runes == null)
+            return;
+
+        foreach (var rune in runes)
+        {
+            if (rune != null)
+                rune.SetHighlight(enabled && (!enabled || !rune.IsForbidden));
+        }
     }
 
     public bool TryMoveToRune(RuneNode target)
@@ -607,16 +636,12 @@ public class Stage1PuzzleController : MonoBehaviour
         if (_requiredPathCount == 0 && (pathEdges == null || pathEdges.Length == 0))
             return false;
 
-        // 종료 조건: End 룬이 지정되어 있으면 그 위, 아니면 시작 룬으로 복귀
+        // End 룬이 있으면 그 위에 있어야 클리어. 없으면 모든 필수 Path만 지나면 클리어.
         if (_hasExplicitEndRune)
         {
             var current = GetRune(_currentRuneIndex);
             if (current == null || !current.IsEndRune)
                 return false;
-        }
-        else if (_currentRuneIndex != _startRuneIndex)
-        {
-            return false;
         }
 
         bool anyMandatoryPath = false;

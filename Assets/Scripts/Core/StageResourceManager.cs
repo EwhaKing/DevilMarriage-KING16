@@ -71,6 +71,13 @@ public class StageResourceManager : MonoBehaviour
         ResetResources();
     }
 
+    public void SetRatBloodCapacity(int capacity)
+    {
+        maxRatBlood = Mathf.Max(0, capacity);
+        CurrentRatBlood = maxRatBlood;
+        OnRatBloodChanged?.Invoke(CurrentRatBlood, maxRatBlood);
+    }
+
     public bool HasRatBlood(int amount = 1)
     {
         return CurrentRatBlood >= amount;

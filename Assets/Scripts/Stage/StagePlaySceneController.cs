@@ -85,6 +85,33 @@ public class StagePlaySceneController : MonoBehaviour
 
         if (stage != null && stage.stageNumber == 10 && GetComponent<Stage10PlayIntroController>() == null)
             gameObject.AddComponent<Stage10PlayIntroController>();
+
+        if (stage != null && stage.stageNumber == 13 && GetComponent<Stage13PlayIntroController>() == null)
+            gameObject.AddComponent<Stage13PlayIntroController>();
+
+        if (stage != null && stage.stageNumber == 21 && GetComponent<Stage21PlayIntroController>() == null)
+            gameObject.AddComponent<Stage21PlayIntroController>();
+
+        if (stage != null && stage.stageNumber == 22 && GetComponent<Stage22PlayIntroController>() == null)
+            gameObject.AddComponent<Stage22PlayIntroController>();
+
+        if (stage != null && stage.stageNumber == 24 && GetComponent<Stage24PlayIntroController>() == null)
+            gameObject.AddComponent<Stage24PlayIntroController>();
+
+        if (stage != null && stage.stageNumber == 27 && GetComponent<Stage27PlayIntroController>() == null)
+            gameObject.AddComponent<Stage27PlayIntroController>();
+
+        if (stage != null && stage.stageNumber == 28 && GetComponent<Stage28PlayIntroController>() == null)
+            gameObject.AddComponent<Stage28PlayIntroController>();
+
+        if (stage != null && stage.stageNumber == 29 && GetComponent<Stage29PlayIntroController>() == null)
+            gameObject.AddComponent<Stage29PlayIntroController>();
+
+        if (stage != null && stage.stageNumber == 31 && GetComponent<Stage31PlayIntroController>() == null)
+            gameObject.AddComponent<Stage31PlayIntroController>();
+
+        if (stage != null && stage.stageNumber == 33 && GetComponent<Stage33PlayIntroController>() == null)
+            gameObject.AddComponent<Stage33PlayIntroController>();
     }
 
     private void OnDestroy()
@@ -178,6 +205,21 @@ public class StagePlaySceneController : MonoBehaviour
 
         if (puzzleController != null)
             puzzleController.ApplyPlaySettings(playData);
+
+        SyncRatBloodToPathCount();
+    }
+
+    private void SyncRatBloodToPathCount()
+    {
+        if (resourceManager == null || puzzleController == null)
+            return;
+
+        puzzleController.RefreshRuneAndEdgeCache();
+        int pathCount = puzzleController.CountPaths();
+        if (pathCount <= 0)
+            return;
+
+        resourceManager.SetRatBloodCapacity(pathCount);
     }
 
     private void ShowRetryPopup()
@@ -206,6 +248,8 @@ public class StagePlaySceneController : MonoBehaviour
                 resourceManager.ApplyPlayData(stage.playData);
             else
                 resourceManager.ResetResources();
+
+            SyncRatBloodToPathCount();
         }
 
         if (puzzleController != null)

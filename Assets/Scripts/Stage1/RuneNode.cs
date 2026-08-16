@@ -12,7 +12,7 @@ public class RuneNode : MonoBehaviour
     [SerializeField] private int runeIndex;
 
     [Header("Roles")]
-    [Tooltip("시작 룬. 여러 개면 가장 먼저 찾은 것을 사용합니다.")]
+    [Tooltip("시작 룬 표시용. 실제 시작점은 플레이 시작 전 플레이어가 직접 고릅니다.")]
     [SerializeField] private bool isStartRune;
 
     [Tooltip("종료 룬. 하나라도 켜져 있으면 클리어 시 이 룬 위에 있어야 합니다. 모두 끄면 시작 룬으로 돌아와야 클리어됩니다.")]

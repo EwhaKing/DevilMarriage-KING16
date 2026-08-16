@@ -1327,10 +1327,11 @@ MonoBehaviour:
   stageButtons: []
   endOfContentPopup: {fileID: 0}
   endOfContentText: {fileID: 0}
-  endOfContentMessage: "\uD604\uC7AC \uAD6C\uD604 \uBC94\uC704(\uC2A4\uD14C\uC774\uC9C0
-    1~3)\uAC00 \uB05D\uB0AC\uC2B5\uB2C8\uB2E4.\n\uCD94\uD6C4 \uC5C5\uB370\uC774\uD2B8\uB97C
-    \uAE30\uB2E4\uB824 \uC8FC\uC138\uC694."
+  endOfContentMessage: "Stage 34\uB294 \uC544\uC9C1 \uC900\uBE44 \uC911\uC785\uB2C8\uB2E4.\n\uD074\uB9AC\uC5B4\uD55C
+    Stage 1~33\uB294 \uB2E4\uC2DC \uD50C\uB808\uC774\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4."
   settingPopup: {fileID: 900000001}
+  stageButtonSpacing: 24
+  stageScrollPadding: 40
 --- !u!1 &1437839659
 GameObject:
   m_ObjectHideFlags: 0

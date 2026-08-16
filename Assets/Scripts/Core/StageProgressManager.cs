@@ -5,11 +5,11 @@ public static class StageProgressManager
     private const string HighestUnlockedKey = "HighestUnlockedStage";
     private const string ClearedKeyPrefix = "StageCleared_";
 
-    /// <summary>선택 화면에 표시할 스테이지 버튼 수 (해금만 되는 Stage11 포함).</summary>
-    public const int ImplementedStageCount = 11;
+    /// <summary>선택 화면에 표시할 스테이지 버튼 수 (해금만 되는 Stage34 포함).</summary>
+    public const int ImplementedStageCount = 34;
 
     /// <summary>현재 플레이 가능한 마지막 스테이지. 이 스테이지를 클리어하면 콘텐츠 종료로 간주.</summary>
-    public const int CurrentContentStageCount = 10;
+    public const int CurrentContentStageCount = 33;
 
     public static int HighestUnlockedStage
     {

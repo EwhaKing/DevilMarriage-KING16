@@ -18,3 +18,9 @@ MonoBehaviour:
   keyboard: {fileID: -3676571329350590026, guid: b3e6643dcf83cca4fb61cc702672071c, type: 3}
   drum: {fileID: -4819397385978723362, guid: 7388c702b38aeff45a01d911d4688c1c, type: 3}
   belian: {fileID: -6557209856017570972, guid: 849e48ac45f11764e9fbc71a5f7a348d, type: 3}
+  ash: {fileID: -4512428710155895180, guid: 34744bcb459b8bb49b21105071f1afb4, type: 3}
+  inventor: {fileID: -1331309512527635779, guid: 3fd093af995a91a47b442b2ba199be94, type: 3}
+  asbel: {fileID: -4847850481699820493, guid: 9cfc2186ab7d1024b9fcf7bc317a077b, type: 3}
+  chef: {fileID: 3720001316550524191, guid: 9e391fe5d5107414086e5c81caef8b37, type: 3}
+  photographer: {fileID: 5471133467236950197, guid: 7fb33407d9542114c990e6ab527f6478, type: 3}
+  host: {fileID: -7848422724102186361, guid: 12837ee767fae8948ac1557f0b6e8455, type: 3}
