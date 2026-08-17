@@ -84,8 +84,8 @@ LineRenderer:
   m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Positions:
-  - {x: -2.36, y: -1.63, z: 0}
-  - {x: 2.41, y: -1.63, z: 0}
+  - {x: -2.31, y: -0.060000062, z: 0}
+  - {x: 2.46, y: -0.060000062, z: 0}
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 1
@@ -263,8 +263,8 @@ LineRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Positions:
-  - {x: -1.5, y: -3.75, z: 0}
-  - {x: 0, y: -2.62, z: 0}
+  - {x: -1.45, y: -2.18, z: 0}
+  - {x: 0.049999952, y: -1.05, z: 0}
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 1
@@ -414,8 +414,8 @@ LineRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Positions:
-  - {x: -1.5, y: -0.36, z: 0}
-  - {x: 0, y: -2.62, z: 0}
+  - {x: -1.45, y: 1.2099999, z: 0}
+  - {x: 0.049999952, y: -1.05, z: 0}
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 1
@@ -565,8 +565,8 @@ LineRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Positions:
-  - {x: 0, y: -2.62, z: 0}
-  - {x: 1.5, y: -3.75, z: 0}
+  - {x: 0.049999952, y: -1.05, z: 0}
+  - {x: 1.55, y: -2.18, z: 0}
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 1
@@ -718,8 +718,8 @@ LineRenderer:
   m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Positions:
-  - {x: 2.41, y: -1.63, z: 0}
-  - {x: 3.26, y: -0.36, z: 0}
+  - {x: 2.46, y: -0.060000062, z: 0}
+  - {x: 3.31, y: 1.21, z: 0}
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 1
@@ -897,8 +897,8 @@ LineRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Positions:
-  - {x: 1.5, y: -0.36, z: 0}
-  - {x: 0, y: 1.5, z: 0}
+  - {x: 1.55, y: 1.2099999, z: 0}
+  - {x: 0.049999952, y: 3.07, z: 0}
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 1
@@ -1050,8 +1050,8 @@ LineRenderer:
   m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Positions:
-  - {x: -1.5, y: -3.75, z: 0}
-  - {x: 0, y: -2.62, z: 0}
+  - {x: -1.45, y: -2.18, z: 0}
+  - {x: 0.049999952, y: -1.05, z: 0}
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 1
@@ -1231,8 +1231,8 @@ LineRenderer:
   m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Positions:
-  - {x: 1.5, y: -0.36, z: 0}
-  - {x: 0, y: -2.62, z: 0}
+  - {x: 1.55, y: 1.2099999, z: 0}
+  - {x: 0.049999952, y: -1.05, z: 0}
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 1
@@ -1412,8 +1412,8 @@ LineRenderer:
   m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Positions:
-  - {x: 1.5, y: -0.36, z: 0}
-  - {x: 2.41, y: -1.63, z: 0}
+  - {x: 1.55, y: 1.2099999, z: 0}
+  - {x: 2.46, y: -0.060000062, z: 0}
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 1
@@ -1591,8 +1591,8 @@ LineRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Positions:
-  - {x: -2.36, y: -1.63, z: 0}
-  - {x: -1.5, y: -3.75, z: 0}
+  - {x: -2.31, y: -0.060000062, z: 0}
+  - {x: -1.45, y: -2.18, z: 0}
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 1
@@ -1744,8 +1744,8 @@ LineRenderer:
   m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Positions:
-  - {x: -2.36, y: -1.63, z: 0}
-  - {x: -1.5, y: -3.75, z: 0}
+  - {x: -2.31, y: -0.060000062, z: 0}
+  - {x: -1.45, y: -2.18, z: 0}
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 1
@@ -1869,7 +1869,7 @@ Transform:
   m_GameObject: {fileID: 3443971190721067402}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3.26, y: -0.36, z: 0}
+  m_LocalPosition: {x: 3.31, y: 1.21, z: 0}
   m_LocalScale: {x: 0.6, y: 0.6, z: 0.6}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1987,7 +1987,7 @@ MonoBehaviour:
   isEndRune: 0
   isMandatory: 1
   isForbidden: 0
-  isSanityHazard: 0
+  isSanityHazard: 1
 --- !u!1 &3734847476088052596
 GameObject:
   m_ObjectHideFlags: 0
@@ -2070,8 +2070,8 @@ LineRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Positions:
-  - {x: -1.5, y: -0.36, z: 0}
-  - {x: -3.32, y: -0.36, z: 0}
+  - {x: -1.45, y: 1.2099999, z: 0}
+  - {x: -3.27, y: 1.2099999, z: 0}
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 1
@@ -2223,8 +2223,8 @@ LineRenderer:
   m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Positions:
-  - {x: -3.32, y: -0.36, z: 0}
-  - {x: -2.36, y: -1.63, z: 0}
+  - {x: -3.27, y: 1.2099999, z: 0}
+  - {x: -2.31, y: -0.060000062, z: 0}
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 1
@@ -2348,7 +2348,7 @@ Transform:
   m_GameObject: {fileID: 3913407948590048268}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.5, y: -0.36, z: 0}
+  m_LocalPosition: {x: 1.55, y: 1.2099999, z: 0}
   m_LocalScale: {x: 0.6, y: 0.6, z: 0.6}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2551,8 +2551,8 @@ LineRenderer:
   m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Positions:
-  - {x: 1.5, y: -0.36, z: 0}
-  - {x: 0, y: 1.5, z: 0}
+  - {x: 1.55, y: 1.2099999, z: 0}
+  - {x: 0.049999952, y: 3.07, z: 0}
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 1
@@ -2730,8 +2730,8 @@ LineRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Positions:
-  - {x: 3.26, y: -0.36, z: 0}
-  - {x: 1.5, y: -0.36, z: 0}
+  - {x: 3.31, y: 1.21, z: 0}
+  - {x: 1.55, y: 1.2099999, z: 0}
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 1
@@ -2881,8 +2881,8 @@ LineRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Positions:
-  - {x: 1.5, y: -3.75, z: 0}
-  - {x: 2.41, y: -1.63, z: 0}
+  - {x: 1.55, y: -2.18, z: 0}
+  - {x: 2.46, y: -0.060000062, z: 0}
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 1
@@ -2978,7 +2978,7 @@ Transform:
   m_GameObject: {fileID: 5164187442065187423}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.5, y: -3.75, z: 0}
+  m_LocalPosition: {x: 1.55, y: -2.18, z: 0}
   m_LocalScale: {x: 0.6, y: 0.6, z: 0.6}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3179,8 +3179,8 @@ LineRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Positions:
-  - {x: -1.5, y: -0.36, z: 0}
-  - {x: 1.5, y: -0.36, z: 0}
+  - {x: -1.45, y: 1.2099999, z: 0}
+  - {x: 1.55, y: 1.2099999, z: 0}
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 1
@@ -3276,7 +3276,7 @@ Transform:
   m_GameObject: {fileID: 5284270188484302105}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.5, y: -3.75, z: 0}
+  m_LocalPosition: {x: -1.45, y: -2.18, z: 0}
   m_LocalScale: {x: 0.6, y: 0.6, z: 0.6}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3394,7 +3394,7 @@ MonoBehaviour:
   isEndRune: 0
   isMandatory: 1
   isForbidden: 0
-  isSanityHazard: 0
+  isSanityHazard: 1
 --- !u!1 &5437826727407132075
 GameObject:
   m_ObjectHideFlags: 0
@@ -3479,8 +3479,8 @@ LineRenderer:
   m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Positions:
-  - {x: 0, y: -2.62, z: 0}
-  - {x: 1.5, y: -3.75, z: 0}
+  - {x: 0.049999952, y: -1.05, z: 0}
+  - {x: 1.55, y: -2.18, z: 0}
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 1
@@ -3658,8 +3658,8 @@ LineRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Positions:
-  - {x: 0, y: 1.5, z: 0}
-  - {x: -1.5, y: -0.36, z: 0}
+  - {x: 0.049999952, y: 3.07, z: 0}
+  - {x: -1.45, y: 1.2099999, z: 0}
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 1
@@ -3809,8 +3809,8 @@ LineRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Positions:
-  - {x: -1.5, y: -0.36, z: 0}
-  - {x: -2.36, y: -1.63, z: 0}
+  - {x: -1.45, y: 1.2099999, z: 0}
+  - {x: -2.31, y: -0.060000062, z: 0}
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 1
@@ -3960,8 +3960,8 @@ LineRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Positions:
-  - {x: -3.32, y: -0.36, z: 0}
-  - {x: -2.36, y: -1.63, z: 0}
+  - {x: -3.27, y: 1.2099999, z: 0}
+  - {x: -2.31, y: -0.060000062, z: 0}
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 1
@@ -4057,7 +4057,7 @@ Transform:
   m_GameObject: {fileID: 6209779825447713475}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2.41, y: -1.63, z: 0}
+  m_LocalPosition: {x: 2.46, y: -0.060000062, z: 0}
   m_LocalScale: {x: 0.6, y: 0.6, z: 0.6}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4455,8 +4455,8 @@ LineRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Positions:
-  - {x: 1.5, y: -0.36, z: 0}
-  - {x: 0, y: -2.62, z: 0}
+  - {x: 1.55, y: 1.2099999, z: 0}
+  - {x: 0.049999952, y: -1.05, z: 0}
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 1
@@ -4552,7 +4552,7 @@ Transform:
   m_GameObject: {fileID: 6412870081012147517}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.5, z: 0}
+  m_LocalPosition: {x: 0.049999952, y: 3.07, z: 0}
   m_LocalScale: {x: 0.6, y: 0.6, z: 0.6}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4755,8 +4755,8 @@ LineRenderer:
   m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Positions:
-  - {x: -1.5, y: -0.36, z: 0}
-  - {x: -3.32, y: -0.36, z: 0}
+  - {x: -1.45, y: 1.2099999, z: 0}
+  - {x: -3.27, y: 1.2099999, z: 0}
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 1
@@ -4880,7 +4880,7 @@ Transform:
   m_GameObject: {fileID: 6708803919365651235}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.5, y: -0.36, z: 0}
+  m_LocalPosition: {x: -1.45, y: 1.2099999, z: 0}
   m_LocalScale: {x: 0.6, y: 0.6, z: 0.6}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -5081,8 +5081,8 @@ LineRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Positions:
-  - {x: 2.41, y: -1.63, z: 0}
-  - {x: 3.26, y: -0.36, z: 0}
+  - {x: 2.46, y: -0.060000062, z: 0}
+  - {x: 3.31, y: 1.21, z: 0}
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 1
@@ -5281,8 +5281,8 @@ LineRenderer:
   m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Positions:
-  - {x: -1.5, y: -0.36, z: 0}
-  - {x: 0, y: -2.62, z: 0}
+  - {x: -1.45, y: 1.2099999, z: 0}
+  - {x: 0.049999952, y: -1.05, z: 0}
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 1
@@ -5406,7 +5406,7 @@ Transform:
   m_GameObject: {fileID: 7411312197318845993}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -3.32, y: -0.36, z: 0}
+  m_LocalPosition: {x: -3.27, y: 1.2099999, z: 0}
   m_LocalScale: {x: 0.6, y: 0.6, z: 0.6}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -5524,7 +5524,7 @@ MonoBehaviour:
   isEndRune: 0
   isMandatory: 1
   isForbidden: 0
-  isSanityHazard: 0
+  isSanityHazard: 1
 --- !u!1 &7470138603086209958
 GameObject:
   m_ObjectHideFlags: 0
@@ -5607,8 +5607,8 @@ LineRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Positions:
-  - {x: 1.5, y: -0.36, z: 0}
-  - {x: 2.41, y: -1.63, z: 0}
+  - {x: 1.55, y: 1.2099999, z: 0}
+  - {x: 2.46, y: -0.060000062, z: 0}
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 1
@@ -5704,7 +5704,7 @@ Transform:
   m_GameObject: {fileID: 7709380526543893247}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -2.36, y: -1.63, z: 0}
+  m_LocalPosition: {x: -2.31, y: -0.060000062, z: 0}
   m_LocalScale: {x: 0.6, y: 0.6, z: 0.6}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -5822,7 +5822,7 @@ MonoBehaviour:
   isEndRune: 0
   isMandatory: 1
   isForbidden: 0
-  isSanityHazard: 0
+  isSanityHazard: 1
 --- !u!1 &8013573559216438871
 GameObject:
   m_ObjectHideFlags: 0
@@ -5907,8 +5907,8 @@ LineRenderer:
   m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Positions:
-  - {x: 1.5, y: -3.75, z: 0}
-  - {x: 2.41, y: -1.63, z: 0}
+  - {x: 1.55, y: -2.18, z: 0}
+  - {x: 2.46, y: -0.060000062, z: 0}
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 1
@@ -6086,8 +6086,8 @@ LineRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Positions:
-  - {x: -2.36, y: -1.63, z: 0}
-  - {x: 2.41, y: -1.63, z: 0}
+  - {x: -2.31, y: -0.060000062, z: 0}
+  - {x: 2.46, y: -0.060000062, z: 0}
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 1
@@ -6239,8 +6239,8 @@ LineRenderer:
   m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Positions:
-  - {x: -1.5, y: -0.36, z: 0}
-  - {x: -2.36, y: -1.63, z: 0}
+  - {x: -1.45, y: 1.2099999, z: 0}
+  - {x: -2.31, y: -0.060000062, z: 0}
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 1
@@ -6420,8 +6420,8 @@ LineRenderer:
   m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Positions:
-  - {x: 3.26, y: -0.36, z: 0}
-  - {x: 1.5, y: -0.36, z: 0}
+  - {x: 3.31, y: 1.21, z: 0}
+  - {x: 1.55, y: 1.2099999, z: 0}
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 1
@@ -6601,8 +6601,8 @@ LineRenderer:
   m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Positions:
-  - {x: 0, y: 1.5, z: 0}
-  - {x: -1.5, y: -0.36, z: 0}
+  - {x: 0.049999952, y: 3.07, z: 0}
+  - {x: -1.45, y: 1.2099999, z: 0}
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 1
@@ -6782,8 +6782,8 @@ LineRenderer:
   m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Positions:
-  - {x: -1.5, y: -0.36, z: 0}
-  - {x: 1.5, y: -0.36, z: 0}
+  - {x: -1.45, y: 1.2099999, z: 0}
+  - {x: 1.55, y: 1.2099999, z: 0}
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 1
@@ -6907,7 +6907,7 @@ Transform:
   m_GameObject: {fileID: 8571049259676894717}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -2.62, z: 0}
+  m_LocalPosition: {x: 0.049999952, y: -1.05, z: 0}
   m_LocalScale: {x: 0.6, y: 0.6, z: 0.6}
   m_ConstrainProportionsScale: 0
   m_Children: []

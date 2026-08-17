@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,6 +9,7 @@ public class StageSelectButtonEntry
 {
     public int stageNumber;
     public Button button;
+    public Image buttonImage;
     public GameObject lockOverlay;
     public TextMeshProUGUI labelText;
 }
@@ -22,24 +24,27 @@ public class StageSelectController : MonoBehaviour
 
     [Header("Stage Buttons")]
     [SerializeField] private StageSelectButtonEntry[] stageButtons;
+    [SerializeField] private Sprite emptyStageSprite;
+    [SerializeField] private Sprite clearedStageSprite;
 
     [Header("End Of Content")]
     [SerializeField] private GameObject endOfContentPopup;
     [SerializeField] private TextMeshProUGUI endOfContentText;
     [SerializeField] private string endOfContentMessage =
-        "Stage 34는 아직 준비 중입니다.\n클리어한 Stage 1~33는 다시 플레이할 수 있습니다.";
+        "이 Stage는 아직 준비 중입니다.\n클리어한 Stage는 다시 플레이할 수 있습니다.";
 
     [Header("Settings")]
     [SerializeField] private GameObject settingPopup;
 
-    [Header("Stage Scroll")]
-    [SerializeField] private float stageButtonSpacing = 24f;
-    [SerializeField] private float stageScrollPadding = 40f;
+    [Header("Stage Map")]
+    [SerializeField] private float defaultStageButtonSpacing = 24f;
+    [SerializeField] private StageSelectMapPlayer mapPlayer;
+    [SerializeField] private RuntimeAnimatorController mapPlayerAnimator;
 
-    private ScrollRect _stageScroll;
-    private RectTransform _scrollContent;
-    private float _stageButtonWidth = 200f;
-    private float _stageButtonHeight = 200f;
+    private StageSelectCameraPan _cameraPan;
+    private Canvas _hudCanvas;
+    private RectTransform _mapBounds;
+    private StageSelectMapPlayer _mapPlayer;
 
     private void Awake()
     {
@@ -55,10 +60,18 @@ public class StageSelectController : MonoBehaviour
             endOfContentPopup.SetActive(false);
 
         AutoCreateStageButtonsFromTemplate();
+        EnsureWorldStageMap();
+        EnsureStageSelectPaths();
         AutoWireStageButtonsIfNeeded();
         WireButtons();
         RefreshStageButtons();
-        ScrollToLatestUnlockedStage();
+        SetupCameraPan();
+        ApplyMapLayerOrder();
+    }
+
+    private void Start()
+    {
+        SetupMapPlayer();
     }
 
     private void AutoCreateStageButtonsFromTemplate()
@@ -71,232 +84,292 @@ public class StageSelectController : MonoBehaviour
         if (templateRect == null)
             return;
 
-        _stageButtonWidth = Mathf.Max(1f, templateRect.sizeDelta.x);
-        _stageButtonHeight = Mathf.Max(1f, templateRect.sizeDelta.y);
+        var parent = template.transform.parent;
+        HideStageButtonText(template);
+        ApplyStageButtonSprite(template.GetComponent<Image>(), cleared: false);
 
-        EnsureStageScrollView(templateRect);
-
-        if (templateRect.parent != _scrollContent)
-            PrepareStageButtonRect(templateRect);
-
-        for (int stageNumber = 2; stageNumber <= StageProgressManager.ImplementedStageCount; stageNumber++)
+        for (int stageNumber = 2; stageNumber <= StageProgressManager.StageSelectButtonCount; stageNumber++)
         {
             var existing = GameObject.Find($"Stage{stageNumber}_Button");
-            RectTransform cloneRect;
-
             if (existing != null)
             {
-                cloneRect = existing.GetComponent<RectTransform>();
-            }
-            else
-            {
-                var clone = Instantiate(template, _scrollContent);
-                clone.name = $"Stage{stageNumber}_Button";
-                cloneRect = clone.GetComponent<RectTransform>();
+                HideStageButtonText(existing);
+                ApplyStageButtonSprite(existing.GetComponent<Image>(), cleared: false);
+                continue;
             }
 
+            var clone = Instantiate(template, parent);
+            clone.name = $"Stage{stageNumber}_Button";
+            var cloneRect = clone.GetComponent<RectTransform>();
             if (cloneRect != null)
-                PrepareStageButtonRect(cloneRect);
-        }
+            {
+                cloneRect.anchorMin = templateRect.anchorMin;
+                cloneRect.anchorMax = templateRect.anchorMax;
+                cloneRect.pivot = templateRect.pivot;
+                cloneRect.sizeDelta = templateRect.sizeDelta;
+                cloneRect.anchoredPosition = DefaultStageButtonPosition(
+                    templateRect.anchoredPosition,
+                    templateRect.sizeDelta,
+                    stageNumber);
+            }
 
-        RefreshScrollContentSize();
+            HideStageButtonText(clone);
+            ApplyStageButtonSprite(clone.GetComponent<Image>(), cleared: false);
+        }
     }
 
-    private void EnsureStageScrollView(RectTransform templateRect)
+    private void EnsureWorldStageMap()
     {
-        if (_stageScroll != null && _scrollContent != null)
+        var background = GameObject.Find("BackGround");
+        var template = GameObject.Find("Stage1_Button");
+        if (background == null || template == null)
             return;
 
-        var canvas = templateRect.GetComponentInParent<Canvas>();
-        if (canvas == null)
-            canvas = FindAnyObjectByType<Canvas>();
-        if (canvas == null)
-            return;
+        _mapBounds = background.GetComponent<RectTransform>();
 
-        var existing = GameObject.Find("StageScrollView");
-        if (existing != null)
+        var hudCanvas = template.GetComponentInParent<Canvas>();
+        if (hudCanvas != null)
         {
-            _stageScroll = existing.GetComponent<ScrollRect>();
-            _scrollContent = existing.transform.Find("Viewport/Content") as RectTransform;
-            if (_stageScroll != null && _scrollContent != null)
+            _hudCanvas = hudCanvas;
+            hudCanvas.sortingOrder = Mathf.Max(hudCanvas.sortingOrder, 10);
+        }
+
+        Canvas.ForceUpdateCanvases();
+
+        var mapObject = GameObject.Find("StageMapCanvas");
+        RectTransform mapRect;
+        if (mapObject == null)
+        {
+            mapObject = new GameObject("StageMapCanvas", typeof(RectTransform), typeof(Canvas), typeof(GraphicRaycaster));
+            var mapCanvas = mapObject.GetComponent<Canvas>();
+            mapRect = mapObject.GetComponent<RectTransform>();
+            mapCanvas.renderMode = RenderMode.WorldSpace;
+            mapCanvas.worldCamera = Camera.main;
+            mapCanvas.sortingOrder = 0;
+
+            if (hudCanvas != null)
+            {
+                mapRect.position = hudCanvas.transform.position;
+                mapRect.rotation = hudCanvas.transform.rotation;
+                var hudScale = hudCanvas.transform.lossyScale;
+                if (hudScale.x > 0.0001f)
+                {
+                    mapRect.localScale = hudScale;
+                }
+                else
+                {
+                    var cam = Camera.main;
+                    float mapHeight = Mathf.Max(1f, _mapBounds != null ? _mapBounds.sizeDelta.y : 1440f);
+                    float worldHeight = cam != null && cam.orthographic
+                        ? cam.orthographicSize * 2f
+                        : 10f;
+                    float scale = worldHeight / mapHeight;
+                    mapRect.localScale = new Vector3(scale, scale, scale);
+                    if (cam != null)
+                    {
+                        var camPos = cam.transform.position;
+                        mapRect.position = new Vector3(camPos.x, camPos.y, 0f);
+                    }
+                }
+            }
+        }
+        else
+        {
+            var mapCanvas = mapObject.GetComponent<Canvas>();
+            mapRect = mapObject.GetComponent<RectTransform>();
+            if (mapCanvas != null)
+            {
+                mapCanvas.renderMode = RenderMode.WorldSpace;
+                if (mapCanvas.worldCamera == null)
+                    mapCanvas.worldCamera = Camera.main;
+            }
+        }
+
+        _mapBounds = background.GetComponent<RectTransform>();
+        if (_mapBounds != null && mapRect != null)
+        {
+            mapRect.sizeDelta = new Vector2(
+                Mathf.Max(mapRect.sizeDelta.x, _mapBounds.sizeDelta.x),
+                Mathf.Max(mapRect.sizeDelta.y, _mapBounds.sizeDelta.y));
+        }
+
+        if (background.transform.parent != mapObject.transform)
+            background.transform.SetParent(mapObject.transform, true);
+
+        var stageButtonsRoot = GameObject.Find("StageButtons");
+        if (stageButtonsRoot != null)
+        {
+            if (stageButtonsRoot.transform.parent != mapObject.transform)
+                stageButtonsRoot.transform.SetParent(mapObject.transform, true);
+        }
+        else
+        {
+            for (int i = 1; i <= StageProgressManager.StageSelectButtonCount; i++)
+            {
+                var buttonObject = GameObject.Find($"Stage{i}_Button");
+                if (buttonObject == null)
+                    continue;
+                if (buttonObject.transform.parent != mapObject.transform)
+                    buttonObject.transform.SetParent(mapObject.transform, true);
+            }
+        }
+
+        var paths = GameObject.Find("StageSelectPaths");
+        if (paths != null && paths.transform.parent != mapObject.transform)
+            paths.transform.SetParent(mapObject.transform, true);
+
+        var player = mapPlayer != null ? mapPlayer.gameObject : GameObject.Find("StageSelectPlayer");
+        if (player != null && player.transform.parent != mapObject.transform)
+            player.transform.SetParent(mapObject.transform, true);
+    }
+
+    private void SetupCameraPan()
+    {
+        var cam = Camera.main;
+        if (cam == null)
+            return;
+
+        _cameraPan = cam.GetComponent<StageSelectCameraPan>();
+        if (_cameraPan == null)
+            _cameraPan = cam.gameObject.AddComponent<StageSelectCameraPan>();
+
+        _cameraPan.Configure(_mapBounds, settingPopup);
+    }
+
+    private void EnsureStageSelectPaths()
+    {
+        var layout = GetComponent<StageSelectPathLayout>();
+        if (layout == null)
+            layout = gameObject.AddComponent<StageSelectPathLayout>();
+
+        layout.EnsurePathsRoot();
+
+        var mapObject = GameObject.Find("StageMapCanvas");
+        var paths = GameObject.Find("StageSelectPaths");
+        if (mapObject != null && paths != null && paths.transform.parent != mapObject.transform)
+            paths.transform.SetParent(mapObject.transform, true);
+
+        layout.SendPathsBehindButtons();
+
+        if (layout.Links != null && layout.Links.Length > 0)
+        {
+            if (paths == null || paths.transform.childCount == 0)
+                layout.RebuildPathsFromLinks();
+            else
+                layout.RefreshPathPositions();
+        }
+        else
+        {
+            layout.RefreshPathPositions();
+        }
+    }
+
+    private void ApplyMapLayerOrder()
+    {
+        var mapObject = GameObject.Find("StageMapCanvas");
+        Transform parent = mapObject != null ? mapObject.transform : null;
+        var background = GameObject.Find("BackGround");
+        var paths = GameObject.Find("StageSelectPaths");
+        var buttons = GameObject.Find("StageButtons");
+        var player = GameObject.Find("StageSelectPlayer");
+
+        if (parent == null)
+        {
+            parent = background != null ? background.transform.parent : null;
+            if (parent == null)
                 return;
         }
 
-        var scrollObject = new GameObject("StageScrollView", typeof(RectTransform));
-        scrollObject.transform.SetParent(canvas.transform, false);
-        int backgroundIndex = -1;
-        for (int i = 0; i < canvas.transform.childCount; i++)
-        {
-            if (canvas.transform.GetChild(i).name == "BackGround")
-            {
-                backgroundIndex = i;
-                break;
-            }
-        }
-
-        scrollObject.transform.SetSiblingIndex(backgroundIndex >= 0 ? backgroundIndex + 1 : 0);
-        if (settingPopup != null)
-            settingPopup.transform.SetAsLastSibling();
-
-        var scrollRectTransform = scrollObject.GetComponent<RectTransform>();
-        scrollRectTransform.anchorMin = new Vector2(0f, 0.18f);
-        scrollRectTransform.anchorMax = new Vector2(1f, 0.58f);
-        scrollRectTransform.offsetMin = Vector2.zero;
-        scrollRectTransform.offsetMax = Vector2.zero;
-        scrollRectTransform.pivot = new Vector2(0.5f, 0.5f);
-
-        var scrollBackground = scrollObject.AddComponent<Image>();
-        scrollBackground.color = new Color(0f, 0f, 0f, 0f);
-        scrollBackground.raycastTarget = true;
-
-        var viewportObject = new GameObject("Viewport", typeof(RectTransform));
-        viewportObject.transform.SetParent(scrollObject.transform, false);
-        var viewportRect = viewportObject.GetComponent<RectTransform>();
-        viewportRect.anchorMin = new Vector2(0f, 0.18f);
-        viewportRect.anchorMax = Vector2.one;
-        viewportRect.offsetMin = Vector2.zero;
-        viewportRect.offsetMax = Vector2.zero;
-        viewportRect.pivot = new Vector2(0.5f, 0.5f);
-
-        var viewportImage = viewportObject.AddComponent<Image>();
-        viewportImage.color = Color.white;
-        viewportImage.raycastTarget = true;
-
-        var mask = viewportObject.AddComponent<Mask>();
-        mask.showMaskGraphic = false;
-
-        var contentObject = new GameObject("Content", typeof(RectTransform));
-        contentObject.transform.SetParent(viewportObject.transform, false);
-        _scrollContent = contentObject.GetComponent<RectTransform>();
-        _scrollContent.anchorMin = new Vector2(0f, 0.5f);
-        _scrollContent.anchorMax = new Vector2(0f, 0.5f);
-        _scrollContent.pivot = new Vector2(0f, 0.5f);
-        _scrollContent.anchoredPosition = Vector2.zero;
-        _scrollContent.sizeDelta = new Vector2(0f, _stageButtonHeight + 24f);
-
-        var scrollbar = CreateHorizontalScrollbar(scrollObject.transform);
-
-        _stageScroll = scrollObject.AddComponent<ScrollRect>();
-        _stageScroll.content = _scrollContent;
-        _stageScroll.viewport = viewportRect;
-        _stageScroll.horizontal = true;
-        _stageScroll.vertical = false;
-        _stageScroll.movementType = ScrollRect.MovementType.Clamped;
-        _stageScroll.inertia = true;
-        _stageScroll.decelerationRate = 0.135f;
-        _stageScroll.scrollSensitivity = 40f;
-        _stageScroll.horizontalScrollbar = scrollbar;
-        _stageScroll.horizontalScrollbarVisibility = ScrollRect.ScrollbarVisibility.Permanent;
-        _stageScroll.horizontalScrollbarSpacing = 8f;
+        int sibling = 0;
+        if (background != null && background.transform.parent == parent)
+            background.transform.SetSiblingIndex(sibling++);
+        if (paths != null && paths.transform.parent == parent)
+            paths.transform.SetSiblingIndex(sibling++);
+        if (buttons != null && buttons.transform.parent == parent)
+            buttons.transform.SetSiblingIndex(sibling++);
+        if (player != null && player.transform.parent == parent)
+            player.transform.SetAsLastSibling();
     }
 
-    private Scrollbar CreateHorizontalScrollbar(Transform parent)
+    private void SetupMapPlayer()
     {
-        var barObject = new GameObject("Scrollbar", typeof(RectTransform));
-        barObject.transform.SetParent(parent, false);
-
-        var barRect = barObject.GetComponent<RectTransform>();
-        barRect.anchorMin = new Vector2(0.08f, 0f);
-        barRect.anchorMax = new Vector2(0.92f, 0.16f);
-        barRect.offsetMin = Vector2.zero;
-        barRect.offsetMax = Vector2.zero;
-        barRect.pivot = new Vector2(0.5f, 0.5f);
-
-        var barImage = barObject.AddComponent<Image>();
-        barImage.color = new Color(0.12f, 0.1f, 0.14f, 0.85f);
-
-        var slidingObject = new GameObject("Sliding Area", typeof(RectTransform));
-        slidingObject.transform.SetParent(barObject.transform, false);
-        var slidingRect = slidingObject.GetComponent<RectTransform>();
-        slidingRect.anchorMin = Vector2.zero;
-        slidingRect.anchorMax = Vector2.one;
-        slidingRect.offsetMin = new Vector2(10f, 6f);
-        slidingRect.offsetMax = new Vector2(-10f, -6f);
-
-        var handleObject = new GameObject("Handle", typeof(RectTransform));
-        handleObject.transform.SetParent(slidingObject.transform, false);
-        var handleRect = handleObject.GetComponent<RectTransform>();
-        handleRect.anchorMin = Vector2.zero;
-        handleRect.anchorMax = Vector2.one;
-        handleRect.offsetMin = Vector2.zero;
-        handleRect.offsetMax = Vector2.zero;
-
-        var handleImage = handleObject.AddComponent<Image>();
-        handleImage.color = new Color(0.82f, 0.72f, 0.55f, 0.95f);
-
-        var scrollbar = barObject.AddComponent<Scrollbar>();
-        scrollbar.handleRect = handleRect;
-        scrollbar.targetGraphic = handleImage;
-        scrollbar.direction = Scrollbar.Direction.LeftToRight;
-        scrollbar.size = 0.35f;
-        scrollbar.numberOfSteps = 0;
-        return scrollbar;
-    }
-
-    private void PrepareStageButtonRect(RectTransform buttonRect)
-    {
-        if (buttonRect == null || _scrollContent == null)
-            return;
-
-        buttonRect.SetParent(_scrollContent, false);
-        buttonRect.anchorMin = new Vector2(0f, 0.5f);
-        buttonRect.anchorMax = new Vector2(0f, 0.5f);
-        buttonRect.pivot = new Vector2(0.5f, 0.5f);
-        buttonRect.sizeDelta = new Vector2(_stageButtonWidth, _stageButtonHeight);
-        buttonRect.localScale = Vector3.one;
-        buttonRect.localRotation = Quaternion.identity;
-    }
-
-    private void RefreshScrollContentSize()
-    {
-        if (_scrollContent == null)
-            return;
-
-        int count = StageProgressManager.ImplementedStageCount;
-        float width = stageScrollPadding * 2f
-                      + count * _stageButtonWidth
-                      + Mathf.Max(0, count - 1) * stageButtonSpacing;
-        _scrollContent.sizeDelta = new Vector2(width, _stageButtonHeight + 24f);
-
-        for (int i = 0; i < _scrollContent.childCount; i++)
-        {
-            var child = _scrollContent.GetChild(i) as RectTransform;
-            if (child == null)
-                continue;
-
-            float x = stageScrollPadding + _stageButtonWidth * 0.5f + i * (_stageButtonWidth + stageButtonSpacing);
-            child.anchoredPosition = new Vector2(x, 0f);
-        }
-    }
-
-    private void ScrollToLatestUnlockedStage()
-    {
-        if (_stageScroll == null || _scrollContent == null)
-            return;
-
         Canvas.ForceUpdateCanvases();
-        RefreshScrollContentSize();
+        GetComponent<StageSelectPathLayout>()?.RefreshPathPositions();
 
-        var viewport = _stageScroll.viewport;
-        float viewportWidth = viewport != null ? viewport.rect.width : 0f;
-        float contentWidth = _scrollContent.rect.width;
-        float overflow = contentWidth - viewportWidth;
-        if (overflow <= 1f)
+        Transform mapParent = null;
+        var mapObject = GameObject.Find("StageMapCanvas");
+        if (mapObject != null)
+            mapParent = mapObject.transform;
+        else
         {
-            _stageScroll.horizontalNormalizedPosition = 0f;
+            var buttons = GameObject.Find("StageButtons");
+            mapParent = buttons != null ? buttons.transform.parent : transform;
+        }
+
+        if (mapPlayer == null)
+            mapPlayer = FindAnyObjectByType<StageSelectMapPlayer>();
+
+        _mapPlayer = StageSelectMapPlayer.FindOrCreate(mapParent, mapPlayer, mapPlayerAnimator, _cameraPan);
+        mapPlayer = _mapPlayer;
+        ApplyMapLayerOrder();
+
+        int currentStage = StageProgressManager.CurrentMapStage;
+        if (!StageProgressManager.IsStageUnlocked(currentStage))
+        {
+            currentStage = 1;
+            StageProgressManager.CurrentMapStage = 1;
+        }
+
+        if (StageProgressManager.TryConsumePendingWalk(out int fromStage, out int toStage)
+            && StageProgressManager.IsStageUnlocked(toStage))
+        {
+            PlacePlayerOnStage(fromStage > 0 ? fromStage : currentStage);
+            FocusCameraOnStage(fromStage > 0 ? fromStage : currentStage);
+            BeginWalkToStage(toStage);
             return;
         }
 
-        int unlocked = Mathf.Clamp(
-            StageProgressManager.HighestUnlockedStage,
-            1,
-            StageProgressManager.ImplementedStageCount);
+        PlacePlayerOnStage(currentStage);
+        FocusCameraOnStage(currentStage);
+    }
 
-        float targetCenter = stageScrollPadding
-                             + _stageButtonWidth * 0.5f
-                             + (unlocked - 1) * (_stageButtonWidth + stageButtonSpacing);
-        float desiredContentX = Mathf.Clamp(targetCenter - viewportWidth * 0.5f, 0f, overflow);
-        _stageScroll.horizontalNormalizedPosition = desiredContentX / overflow;
+    private void PlacePlayerOnStage(int stageNumber)
+    {
+        var button = FindStageButton(stageNumber);
+        if (button == null)
+            button = FindStageButton(1);
+        if (_mapPlayer != null)
+            _mapPlayer.PlaceOn(button);
+        StageProgressManager.CurrentMapStage = stageNumber > 0 ? stageNumber : 1;
+    }
+
+    private RectTransform FindStageButton(int stageNumber)
+    {
+        var buttonObject = GameObject.Find($"Stage{stageNumber}_Button");
+        return buttonObject != null ? buttonObject.GetComponent<RectTransform>() : null;
+    }
+
+    private Vector2 DefaultStageButtonPosition(Vector2 origin, Vector2 size, int stageNumber)
+    {
+        const int columns = 22;
+        int index = Mathf.Max(0, stageNumber - 1);
+        int col = index % columns;
+        int row = index / columns;
+        return origin + new Vector2(
+            col * (size.x + defaultStageButtonSpacing),
+            -row * (size.y + defaultStageButtonSpacing));
+    }
+
+    private void FocusCameraOnStage(int stageNumber)
+    {
+        if (_cameraPan == null)
+            return;
+
+        var button = FindStageButton(stageNumber);
+        if (button != null)
+            _cameraPan.FocusOnWorldX(button.position.x);
+        else if (_mapBounds != null)
+            _cameraPan.FocusOnWorldX(_mapBounds.position.x);
     }
 
     private void AutoWireStageButtonsIfNeeded()
@@ -305,7 +378,7 @@ public class StageSelectController : MonoBehaviour
             return;
 
         var entries = new System.Collections.Generic.List<StageSelectButtonEntry>();
-        for (int i = 1; i <= StageProgressManager.ImplementedStageCount; i++)
+        for (int i = 1; i <= StageProgressManager.StageSelectButtonCount; i++)
         {
             var buttonObject = GameObject.Find($"Stage{i}_Button");
             if (buttonObject == null)
@@ -315,8 +388,9 @@ public class StageSelectController : MonoBehaviour
             {
                 stageNumber = i,
                 button = buttonObject.GetComponent<Button>(),
+                buttonImage = buttonObject.GetComponent<Image>(),
                 lockOverlay = buttonObject.transform.Find("LockOverlay")?.gameObject,
-                labelText = buttonObject.GetComponentInChildren<TextMeshProUGUI>()
+                labelText = buttonObject.GetComponentInChildren<TextMeshProUGUI>(true)
             });
         }
 
@@ -328,6 +402,11 @@ public class StageSelectController : MonoBehaviour
         BindNamedButton("Title_Button", () =>
         {
             GameFlowManager.EnsureExists()?.GoToTitle();
+        });
+
+        BindNamedButton("Devil_Page_Button", () =>
+        {
+            GameFlowManager.EnsureExists()?.GoToDevilPage();
         });
 
         BindNamedButton("Option_Button", OpenSettingsPopup);
@@ -370,38 +449,71 @@ public class StageSelectController : MonoBehaviour
             bool isUnlocked = StageProgressManager.IsStageUnlocked(entry.stageNumber);
             bool isCleared = StageProgressManager.IsStageCleared(entry.stageNumber);
 
-            // Stage 2~5도 해금되면 버튼은 눌러볼 수 있게 둡니다.
-            // (실제 스테이지 시작은 OnStageButtonClicked에서 PlayableStageCount로 제한)
             if (entry.button != null)
                 entry.button.interactable = isUnlocked;
 
             if (entry.lockOverlay != null)
                 entry.lockOverlay.SetActive(!isUnlocked);
 
-            if (entry.labelText != null)
-            {
-                var stageData = GameFlowManager.Instance?.GetStage(entry.stageNumber);
-                string title = stageData != null
-                    ? $"Stage {entry.stageNumber}\n{stageData.stageName}"
-                    : $"Stage {entry.stageNumber}";
+            var buttonObject = entry.button != null ? entry.button.gameObject : null;
+            HideStageButtonText(buttonObject);
 
-                if (isCleared)
-                    title += "\n(CLEAR · 재도전 가능)";
-
-                entry.labelText.text = title;
-            }
+            var image = entry.buttonImage;
+            if (image == null && buttonObject != null)
+                image = buttonObject.GetComponent<Image>();
+            ApplyStageButtonSprite(image, isCleared);
         }
+    }
 
-        // 전체 클리어 후에도 스테이지 선택/재도전은 막지 않습니다.
-        // (미구현 스테이지 클릭 시에만 안내 팝업을 띄웁니다.)
+    private static void HideStageButtonText(GameObject buttonObject)
+    {
+        if (buttonObject == null)
+            return;
+
+        var labels = buttonObject.GetComponentsInChildren<TextMeshProUGUI>(true);
+        foreach (var label in labels)
+        {
+            if (label == null)
+                continue;
+
+            label.text = string.Empty;
+            label.gameObject.SetActive(false);
+        }
+    }
+
+    private void ApplyStageButtonSprite(Image image, bool cleared)
+    {
+        if (image == null)
+            return;
+
+        image.type = Image.Type.Simple;
+        image.preserveAspect = true;
+
+        var sprite = cleared && clearedStageSprite != null
+            ? clearedStageSprite
+            : emptyStageSprite;
+        if (sprite != null)
+            image.sprite = sprite;
     }
 
     private void OnStageButtonClicked(int stageNumber)
     {
+        if (_cameraPan != null && _cameraPan.DidDragThisPointer)
+            return;
+
+        if (_mapPlayer != null && _mapPlayer.IsMoving)
+            return;
+
         if (!StageProgressManager.IsStageUnlocked(stageNumber))
             return;
 
-        // 클리어한 스테이지도 다시 플레이 가능
+        int current = StageProgressManager.CurrentMapStage;
+        if (stageNumber != current)
+        {
+            BeginWalkToStage(stageNumber);
+            return;
+        }
+
         if (stageNumber > PlayableStageCount)
         {
             ShowEndOfContentPopup();
@@ -412,6 +524,174 @@ public class StageSelectController : MonoBehaviour
             GameFlowManager.Instance.StartStage(stageNumber);
         else
             Debug.LogError("[StageSelectController] GameFlowManager를 생성할 수 없습니다.");
+    }
+
+    private void BeginWalkToStage(int destinationStage)
+    {
+        if (_mapPlayer == null)
+        {
+            PlacePlayerOnStage(destinationStage);
+            return;
+        }
+
+        int fromStage = StageProgressManager.CurrentMapStage;
+        if (fromStage == destinationStage)
+            return;
+
+        if (!TryBuildWalkRoute(fromStage, destinationStage, out var hops, out var stages))
+        {
+            PlacePlayerOnStage(destinationStage);
+            FocusCameraOnStage(destinationStage);
+            return;
+        }
+
+        SetStageButtonsInputEnabled(false);
+        _mapPlayer.WalkRoute(hops, stages, FindStageButton, () =>
+        {
+            PlacePlayerOnStage(destinationStage);
+            SetStageButtonsInputEnabled(true);
+        });
+    }
+
+    private void SetStageButtonsInputEnabled(bool enabled)
+    {
+        if (stageButtons == null)
+            return;
+
+        foreach (var entry in stageButtons)
+        {
+            if (entry?.button == null)
+                continue;
+
+            entry.button.interactable = enabled && StageProgressManager.IsStageUnlocked(entry.stageNumber);
+        }
+    }
+
+    private bool TryBuildWalkRoute(
+        int fromStage,
+        int toStage,
+        out List<StageSelectPathView> hops,
+        out List<int> stages)
+    {
+        hops = new List<StageSelectPathView>();
+        stages = new List<int>();
+        if (fromStage == toStage)
+            return false;
+
+        var layout = GetComponent<StageSelectPathLayout>();
+        var graph = BuildPathGraph(layout);
+
+        if (graph.Count > 0 && TryFindGraphRoute(graph, fromStage, toStage, hops, stages))
+            return hops.Count > 0;
+
+        hops.Clear();
+        stages.Clear();
+        int step = toStage > fromStage ? 1 : -1;
+        for (int stage = fromStage; stage != toStage; stage += step)
+        {
+            int next = stage + step;
+            if (!StageProgressManager.IsStageUnlocked(next) && next != toStage)
+                return false;
+
+            hops.Add(layout != null ? layout.FindPath(stage, next) : null);
+            stages.Add(stage);
+        }
+
+        stages.Add(toStage);
+        return hops.Count > 0;
+    }
+
+    private static Dictionary<int, List<(int other, StageSelectPathView view)>> BuildPathGraph(StageSelectPathLayout layout)
+    {
+        var graph = new Dictionary<int, List<(int other, StageSelectPathView view)>>();
+        if (layout == null || layout.Links == null)
+            return graph;
+
+        foreach (var link in layout.Links)
+        {
+            if (link == null)
+                continue;
+
+            int a = StageSelectPathLayout.ParseStageNumber(link.from);
+            int b = StageSelectPathLayout.ParseStageNumber(link.to);
+            if (a <= 0 || b <= 0 || a == b)
+                continue;
+
+            var view = layout.FindPath(a, b);
+            AddGraphEdge(graph, a, b, view);
+            AddGraphEdge(graph, b, a, view);
+        }
+
+        return graph;
+    }
+
+    private static void AddGraphEdge(
+        Dictionary<int, List<(int other, StageSelectPathView view)>> graph,
+        int from,
+        int to,
+        StageSelectPathView view)
+    {
+        if (!graph.TryGetValue(from, out var neighbors))
+        {
+            neighbors = new List<(int other, StageSelectPathView view)>();
+            graph[from] = neighbors;
+        }
+
+        neighbors.Add((to, view));
+    }
+
+    private static bool TryFindGraphRoute(
+        Dictionary<int, List<(int other, StageSelectPathView view)>> graph,
+        int fromStage,
+        int toStage,
+        List<StageSelectPathView> hops,
+        List<int> stages)
+    {
+        var visited = new HashSet<int> { fromStage };
+        var previous = new Dictionary<int, (int from, StageSelectPathView view)>();
+        var queue = new Queue<int>();
+        queue.Enqueue(fromStage);
+
+        while (queue.Count > 0)
+        {
+            int current = queue.Dequeue();
+            if (current == toStage)
+                break;
+            if (!graph.TryGetValue(current, out var neighbors))
+                continue;
+
+            foreach (var (next, view) in neighbors)
+            {
+                if (visited.Contains(next))
+                    continue;
+                if (next != toStage && !StageProgressManager.IsStageUnlocked(next))
+                    continue;
+
+                visited.Add(next);
+                previous[next] = (current, view);
+                queue.Enqueue(next);
+            }
+        }
+
+        if (!previous.ContainsKey(toStage))
+            return false;
+
+        var reverseHops = new List<StageSelectPathView>();
+        var reverseStages = new List<int> { toStage };
+        int node = toStage;
+        while (node != fromStage)
+        {
+            var step = previous[node];
+            reverseHops.Add(step.view);
+            reverseStages.Add(step.from);
+            node = step.from;
+        }
+
+        reverseHops.Reverse();
+        reverseStages.Reverse();
+        hops.AddRange(reverseHops);
+        stages.AddRange(reverseStages);
+        return hops.Count > 0;
     }
 
     public void ShowEndOfContentPopup()
@@ -432,7 +712,19 @@ public class StageSelectController : MonoBehaviour
         if (endOfContentPopup != null)
             return;
 
-        var canvas = FindAnyObjectByType<Canvas>();
+        var canvas = _hudCanvas;
+        if (canvas == null)
+        {
+            foreach (var found in FindObjectsByType<Canvas>(FindObjectsSortMode.None))
+            {
+                if (found != null && found.renderMode != RenderMode.WorldSpace)
+                {
+                    canvas = found;
+                    break;
+                }
+            }
+        }
+
         if (canvas == null)
             return;
 

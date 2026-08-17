@@ -14,6 +14,10 @@ public class StorySceneController : MonoBehaviour
     [SerializeField] private StageBgmPlayer bgmPlayer;
 
     private bool _isTransitioning;
+    private CanvasGroup _fadeGroup;
+    private Image _fadeTarget;
+    private Sprite _savedBackgroundSprite;
+    private Color _savedBackgroundColor = Color.white;
 
     private void Start()
     {
@@ -56,6 +60,10 @@ public class StorySceneController : MonoBehaviour
             dialogueManager.onDialogueFinished = new UnityEvent();
 
         dialogueManager.onDialogueFinished.AddListener(OnDialogueComplete);
+        dialogueManager.OnCustomEvent += HandleDialogueEvent;
+
+        if (dialogueManager.GetComponent<DialogueBookChoiceController>() == null)
+            dialogueManager.gameObject.AddComponent<DialogueBookChoiceController>();
 
         ApplyStagePresentation();
 
@@ -73,7 +81,7 @@ public class StorySceneController : MonoBehaviour
         bool isOpening = GameFlowManager.Instance == null || GameFlowManager.Instance.IsOpeningStory;
 
         var stage = GameFlowManager.Instance != null ? GameFlowManager.Instance.CurrentStage : null;
-        if (stage != null && stage.stageNumber >= 3 && stage.stageNumber <= 33)
+        if (stage != null && stage.stageNumber >= 2 && stage.stageNumber <= 33)
             dialogueData = DialogueContentLibrary.CreateStageRuntime(stage.stageNumber);
 
         dialogueManager.StartStageDialogue(dialogueData, isOpening);
@@ -81,8 +89,12 @@ public class StorySceneController : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (dialogueManager != null && dialogueManager.onDialogueFinished != null)
-            dialogueManager.onDialogueFinished.RemoveListener(OnDialogueComplete);
+        if (dialogueManager != null)
+        {
+            dialogueManager.OnCustomEvent -= HandleDialogueEvent;
+            if (dialogueManager.onDialogueFinished != null)
+                dialogueManager.onDialogueFinished.RemoveListener(OnDialogueComplete);
+        }
     }
 
     private void ApplyStagePresentation()
@@ -109,5 +121,108 @@ public class StorySceneController : MonoBehaviour
             GameFlowManager.Instance.OnOpeningStoryFinished();
         else
             GameFlowManager.Instance.OnClosingStoryFinished();
+    }
+
+    private void HandleDialogueEvent(string eventId)
+    {
+        switch (eventId)
+        {
+            case "FadeToBlack":
+                StartCoroutine(FadeOverlayCoroutine(1f));
+                break;
+            case "FadeFromBlack":
+                StartCoroutine(FadeOverlayCoroutine(0f));
+                break;
+        }
+    }
+
+    private System.Collections.IEnumerator FadeOverlayCoroutine(float targetAlpha)
+    {
+        EnsureFadeOverlay();
+        if (_fadeGroup == null)
+        {
+            dialogueManager?.NotifyExternalEventCompleted();
+            yield break;
+        }
+
+        if (targetAlpha >= 1f && _fadeTarget != null)
+        {
+            _savedBackgroundSprite = _fadeTarget.sprite;
+            _savedBackgroundColor = _fadeTarget.color;
+        }
+
+        float from = _fadeGroup.alpha;
+        float duration = 0.7f;
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            _fadeGroup.alpha = Mathf.Lerp(from, targetAlpha, Mathf.Clamp01(elapsed / duration));
+            yield return null;
+        }
+
+        _fadeGroup.alpha = targetAlpha;
+        _fadeGroup.blocksRaycasts = false;
+
+        if (targetAlpha <= 0.01f && _fadeTarget != null)
+        {
+            _fadeTarget.sprite = _savedBackgroundSprite;
+            _fadeTarget.color = _savedBackgroundColor;
+        }
+
+        if (dialogueManager != null)
+            dialogueManager.NotifyExternalEventCompleted();
+    }
+
+    private void EnsureFadeOverlay()
+    {
+        if (_fadeGroup != null)
+            return;
+
+        ResolveFadeTarget();
+        if (_fadeTarget == null)
+            return;
+
+        var fadeObject = new GameObject("StoryFadeOverlay");
+        fadeObject.transform.SetParent(_fadeTarget.transform.parent, false);
+        fadeObject.transform.SetSiblingIndex(_fadeTarget.transform.GetSiblingIndex() + 1);
+
+        var image = fadeObject.AddComponent<Image>();
+        image.color = Color.black;
+        image.raycastTarget = false;
+
+        var rect = fadeObject.GetComponent<RectTransform>();
+        CopyRect(_fadeTarget.rectTransform, rect);
+
+        _fadeGroup = fadeObject.AddComponent<CanvasGroup>();
+        _fadeGroup.alpha = 0f;
+        _fadeGroup.blocksRaycasts = false;
+        _fadeGroup.ignoreParentGroups = true;
+    }
+
+    private void ResolveFadeTarget()
+    {
+        if (backgroundImage != null)
+        {
+            _fadeTarget = backgroundImage;
+            return;
+        }
+
+        var bgObject = GameObject.Find("bg");
+        if (bgObject != null)
+            _fadeTarget = bgObject.GetComponent<Image>();
+    }
+
+    private static void CopyRect(RectTransform source, RectTransform dest)
+    {
+        dest.anchorMin = source.anchorMin;
+        dest.anchorMax = source.anchorMax;
+        dest.pivot = source.pivot;
+        dest.anchoredPosition = source.anchoredPosition;
+        dest.sizeDelta = source.sizeDelta;
+        dest.offsetMin = source.offsetMin;
+        dest.offsetMax = source.offsetMax;
+        dest.localScale = source.localScale;
     }
 }

@@ -3,7 +3,7 @@ using UnityEngine;
 
 /// <summary>
 /// 스테이지 자원(정신력, 쥐의 피)을 관리한다.
-/// 실패 시 별도 씬으로 이동하지 않고, OnGameOver로 같은 StagePlayScene에서 재도전을 유도한다.
+/// 실패 시 OnGameOver를 발행하고, StagePlaySceneController가 GameOverScene으로 이동한다.
 /// </summary>
 public class StageResourceManager : MonoBehaviour
 {
@@ -103,6 +103,15 @@ public class StageResourceManager : MonoBehaviour
 
         CurrentRatBlood = Mathf.Min(maxRatBlood, CurrentRatBlood + amount);
         OnRatBloodChanged?.Invoke(CurrentRatBlood, maxRatBlood);
+    }
+
+    public void RestoreSanity(int amount)
+    {
+        if (_isGameOver || amount <= 0)
+            return;
+
+        CurrentSanity = Mathf.Min(maxSanity, CurrentSanity + amount);
+        OnSanityChanged?.Invoke(CurrentSanity, maxSanity);
     }
 
     public void ReduceSanity(int amount)

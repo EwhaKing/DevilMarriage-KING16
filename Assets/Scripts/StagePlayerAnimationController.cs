@@ -21,7 +21,10 @@ public class StagePlayerAnimationController : MonoBehaviour
 
     public void SetMoving(bool isMoving)
     {
-        _animator.SetBool(IsMovingHash, isMoving);
+        if (_animator == null)
+            _animator = GetComponent<Animator>();
+        if (_animator != null)
+            _animator.SetBool(IsMovingHash, isMoving);
     }
 
     public void PlayDamaged()

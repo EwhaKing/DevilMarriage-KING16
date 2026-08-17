@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 /// <summary>
@@ -30,6 +31,7 @@ public class StagePlaySceneController : MonoBehaviour
     private GameObject _spawnedPuzzle;
     private Transform _playerTransform;
     private StagePlayerAnimationController _playerAnimation;
+    private DemonSummonSkillPanel _demonSummonSkillPanel;
 
     private void Awake()
     {
@@ -59,24 +61,19 @@ public class StagePlaySceneController : MonoBehaviour
     private void Start()
     {
         ApplyCurrentStageData();
-        EnsureRetryPopup();
-
-        if (retryPopup != null)
-            retryPopup.SetActive(false);
-
-        if (retryButton != null)
-        {
-            retryButton.onClick.RemoveAllListeners();
-            retryButton.onClick.AddListener(RetryCurrentStage);
-        }
 
         if (resourceManager != null)
-            resourceManager.OnGameOver += ShowRetryPopup;
+            resourceManager.OnGameOver += GoToGameOverScene;
 
         if (puzzleController != null)
             puzzleController.UseGameFlowManager = true;
 
+        SetupDemonSummonSkillPanel();
+
         var stage = GameFlowManager.Instance != null ? GameFlowManager.Instance.CurrentStage : null;
+        if (stage != null && stage.stageNumber == 2 && GetComponent<Stage2PlayIntroController>() == null)
+            gameObject.AddComponent<Stage2PlayIntroController>();
+
         if (stage != null && stage.stageNumber == 1 && GetComponent<Stage1PlayTutorialController>() == null)
             gameObject.AddComponent<Stage1PlayTutorialController>();
 
@@ -117,7 +114,7 @@ public class StagePlaySceneController : MonoBehaviour
     private void OnDestroy()
     {
         if (resourceManager != null)
-            resourceManager.OnGameOver -= ShowRetryPopup;
+            resourceManager.OnGameOver -= GoToGameOverScene;
     }
 
     private void CachePlayer()
@@ -181,6 +178,25 @@ public class StagePlaySceneController : MonoBehaviour
         puzzleController.RefreshRuneAndEdgeCache();
     }
 
+    private void SetupDemonSummonSkillPanel()
+    {
+        var canvas = stageHud != null ? stageHud.GetComponent<Canvas>() : null;
+        if (canvas == null)
+            canvas = FindAnyObjectByType<Canvas>();
+
+        _demonSummonSkillPanel = DemonSummonSkillPanel.EnsureOnCanvas(canvas, DemonSkillCatalog.Load());
+        if (_demonSummonSkillPanel == null)
+            return;
+
+        var stage = GameFlowManager.Instance != null ? GameFlowManager.Instance.CurrentStage : null;
+        int stageNumber = stage != null ? stage.stageNumber : 0;
+        var filter = stage != null && stage.playData != null ? stage.playData.availableDemonSkills : null;
+        _demonSummonSkillPanel.BindForStage(stageNumber, filter);
+        _demonSummonSkillPanel.transform.SetAsLastSibling();
+        if (retryPopup != null)
+            retryPopup.transform.SetAsLastSibling();
+    }
+
     private void ApplyCurrentStageData()
     {
         var stage = GameFlowManager.Instance != null ? GameFlowManager.Instance.CurrentStage : null;
@@ -222,18 +238,12 @@ public class StagePlaySceneController : MonoBehaviour
         resourceManager.SetRatBloodCapacity(pathCount);
     }
 
-    private void ShowRetryPopup()
+    private void GoToGameOverScene()
     {
-        EnsureRetryPopup();
-
-        if (puzzleController != null)
-            puzzleController.InputLocked = true;
-
-        if (retryMessageText != null)
-            retryMessageText.text = retryMessage;
-
-        if (retryPopup != null)
-            retryPopup.SetActive(true);
+        if (GameFlowManager.Instance != null)
+            GameFlowManager.Instance.OnStagePlayFailed();
+        else
+            SceneManager.LoadScene(SceneNames.GameOver);
     }
 
     private void RetryCurrentStage()
@@ -259,6 +269,9 @@ public class StagePlaySceneController : MonoBehaviour
             if (stageNum == 4)
                 puzzleController.ConfigureSanityHazardsForStage4();
         }
+
+        if (_demonSummonSkillPanel != null)
+            _demonSummonSkillPanel.ResetUsesForCurrentAttempt();
     }
 
     private void EnsureRetryPopup()

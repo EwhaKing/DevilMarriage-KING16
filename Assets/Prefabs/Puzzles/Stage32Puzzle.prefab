@@ -1160,7 +1160,7 @@ MonoBehaviour:
   isEndRune: 0
   isMandatory: 1
   isForbidden: 0
-  isSanityHazard: 0
+  isSanityHazard: 1
 --- !u!1 &1188674993576143071
 GameObject:
   m_ObjectHideFlags: 0
@@ -4606,7 +4606,7 @@ MonoBehaviour:
   isEndRune: 0
   isMandatory: 1
   isForbidden: 0
-  isSanityHazard: 0
+  isSanityHazard: 1
 --- !u!1 &5069902370465968314
 GameObject:
   m_ObjectHideFlags: 0

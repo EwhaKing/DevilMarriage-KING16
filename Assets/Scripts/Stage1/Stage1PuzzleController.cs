@@ -43,12 +43,14 @@ public class Stage1PuzzleController : MonoBehaviour
     public bool UseGameFlowManager { get; set; }
     public bool InputLocked { get; set; }
     public bool AwaitingStartSelection { get; set; }
+    public bool AwaitingTeleportSelection { get; private set; }
     public int CurrentRuneIndex => _currentRuneIndex;
     public RuneNode[] Runes => runes;
     public RunePathEdge[] PathEdges => pathEdges;
 
     public event Action<RuneNode> OnRuneClicked;
     public event Action OnForwardMoveCompleted;
+    public event Action OnTeleportCompleted;
 
     private readonly Dictionary<long, RunePathEdge> _edgeLookup = new();
     private readonly HashSet<int> _visitedRunes = new();
@@ -230,6 +232,7 @@ public class Stage1PuzzleController : MonoBehaviour
         _isMoving = false;
         _stageCleared = false;
         AwaitingStartSelection = true;
+        AwaitingTeleportSelection = false;
 
         if (player != null)
             player.gameObject.SetActive(false);
@@ -307,8 +310,90 @@ public class Stage1PuzzleController : MonoBehaviour
             return;
         }
 
+        if (AwaitingTeleportSelection)
+        {
+            TryTeleportToRune(target);
+            return;
+        }
+
         OnRuneClicked?.Invoke(target);
         TryMoveToRune(target);
+    }
+
+    public bool BeginTeleportTargeting()
+    {
+        if (InputLocked || AwaitingStartSelection || _isMoving || _stageCleared)
+            return false;
+        if (resourceManager != null && resourceManager.IsGameOver)
+            return false;
+
+        AwaitingTeleportSelection = true;
+        HighlightTeleportTargets();
+        return true;
+    }
+
+    public void CancelTeleportTargeting()
+    {
+        if (!AwaitingTeleportSelection)
+            return;
+
+        AwaitingTeleportSelection = false;
+        SetAllRuneHighlights(false);
+    }
+
+    public bool TryTeleportToRune(RuneNode target)
+    {
+        if (!AwaitingTeleportSelection || InputLocked || _isMoving || _stageCleared)
+            return false;
+        if (resourceManager != null && resourceManager.IsGameOver)
+            return false;
+        if (target == null || target.IsForbidden)
+            return false;
+        if (target.RuneIndex == _currentRuneIndex)
+            return false;
+
+        int fromRuneIndex = _currentRuneIndex;
+        if (player != null)
+        {
+            player.gameObject.SetActive(true);
+            player.position = target.WorldPosition;
+        }
+
+        if (playerAnimation != null)
+            playerAnimation.ResetToIdle();
+
+        _currentRuneIndex = target.RuneIndex;
+        _visitHistory.Add(target.RuneIndex);
+        _visitedRunes.Add(target.RuneIndex);
+        _lastRuneIndex = fromRuneIndex;
+        _lastMoveWasForward = false;
+        AwaitingTeleportSelection = false;
+        SetAllRuneHighlights(false);
+
+        if (target.IsSanityHazard && resourceManager != null)
+            resourceManager.OnSanityHazard();
+
+        OnTeleportCompleted?.Invoke();
+
+        if (CheckStageClear())
+            StartCoroutine(LoadClearSceneAfterDelay());
+
+        return true;
+    }
+
+    public void HighlightTeleportTargets()
+    {
+        if (runes == null)
+            return;
+
+        foreach (var rune in runes)
+        {
+            if (rune == null)
+                continue;
+
+            bool selectable = !rune.IsForbidden && rune.RuneIndex != _currentRuneIndex;
+            rune.SetHighlight(selectable);
+        }
     }
 
     public bool SelectStartRune(RuneNode startRune)

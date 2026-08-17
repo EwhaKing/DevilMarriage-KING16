@@ -107,15 +107,11 @@ public static class DialogueUiBuilder
 
         var logBody = CreateTmp(logPanel.transform, "LogBody", 22, TextAlignmentOptions.TopLeft, font);
         logBody.text = "대화 로그";
-        var logBodyRect = logBody.rectTransform;
-        logBodyRect.anchorMin = new Vector2(0.05f, 0.15f);
-        logBodyRect.anchorMax = new Vector2(0.95f, 0.95f);
-        logBodyRect.offsetMin = Vector2.zero;
-        logBodyRect.offsetMax = Vector2.zero;
 
         var closeLog = CreateUiButton(logPanel.transform, "CloseLog", "Close",
             new Vector2(0.4f, 0.02f), new Vector2(0.6f, 0.12f), font);
         closeLog.onClick.AddListener(() => logPanel.SetActive(false));
+        SetupLogPanelScrolling(logPanel, ref logBody);
         logPanel.SetActive(false);
 
         return new Result
@@ -160,10 +156,109 @@ public static class DialogueUiBuilder
         if (logPanel != null)
         {
             result.logPanelRoot = logPanel.gameObject;
-            result.logBodyText = FindTmp(logPanel, "LogBody");
+            result.logBodyText = FindLogBodyText(logPanel);
+            SetupLogPanelScrolling(result.logPanelRoot, ref result.logBodyText);
         }
 
         return result.speakerNameText != null && result.dialogueBodyText != null;
+    }
+
+    public static TextMeshProUGUI FindLogBodyText(Transform logPanel)
+    {
+        if (logPanel == null)
+            return null;
+
+        return FindTmp(logPanel, "LogBody")
+            ?? FindTmp(logPanel, "Bodytext")
+            ?? FindTmp(logPanel, "BodyText")
+            ?? FindTmp(logPanel, "Body");
+    }
+
+    /// <summary>
+    /// 로그 본문이 DialogueLogPanel 밖으로 새지 않도록 마스크하고, 세로 스크롤로 전체를 볼 수 있게 합니다.
+    /// </summary>
+    public static void SetupLogPanelScrolling(GameObject logPanel, ref TextMeshProUGUI logBody)
+    {
+        if (logPanel == null)
+            return;
+
+        if (logBody == null)
+            logBody = FindLogBodyText(logPanel.transform);
+        if (logBody == null)
+            return;
+
+        var viewport = logPanel.transform.Find("LogViewport") as RectTransform;
+        if (viewport == null)
+        {
+            var viewportGo = new GameObject("LogViewport", typeof(RectTransform), typeof(Image), typeof(RectMask2D));
+            viewport = viewportGo.GetComponent<RectTransform>();
+            viewport.SetParent(logPanel.transform, false);
+            viewport.anchorMin = Vector2.zero;
+            viewport.anchorMax = Vector2.one;
+            viewport.pivot = new Vector2(0.5f, 0.5f);
+            viewport.offsetMin = new Vector2(16f, 16f);
+            viewport.offsetMax = new Vector2(-16f, -16f);
+
+            var viewportImage = viewportGo.GetComponent<Image>();
+            viewportImage.color = new Color(0f, 0f, 0f, 0.01f);
+            viewportImage.raycastTarget = true;
+        }
+
+        var closeLog = FindDeep(logPanel.transform, "CloseLog");
+        if (closeLog != null && closeLog.parent == logPanel.transform)
+        {
+            viewport.anchorMin = new Vector2(0f, 0.14f);
+            viewport.anchorMax = Vector2.one;
+            viewport.offsetMin = new Vector2(16f, 8f);
+            viewport.offsetMax = new Vector2(-16f, -16f);
+            closeLog.SetAsLastSibling();
+        }
+
+        if (logBody.transform.parent != viewport)
+            logBody.transform.SetParent(viewport, false);
+
+        var bodyRect = logBody.rectTransform;
+        bodyRect.anchorMin = new Vector2(0f, 1f);
+        bodyRect.anchorMax = new Vector2(1f, 1f);
+        bodyRect.pivot = new Vector2(0.5f, 1f);
+        bodyRect.anchoredPosition = Vector2.zero;
+        bodyRect.sizeDelta = new Vector2(0f, Mathf.Max(bodyRect.sizeDelta.y, 1f));
+
+        logBody.alignment = TextAlignmentOptions.TopLeft;
+        logBody.textWrappingMode = TextWrappingModes.Normal;
+        logBody.overflowMode = TextOverflowModes.Overflow;
+        logBody.enableAutoSizing = false;
+        logBody.raycastTarget = true;
+        logBody.maskable = true;
+
+        var fitter = logBody.GetComponent<ContentSizeFitter>();
+        if (fitter == null)
+            fitter = logBody.gameObject.AddComponent<ContentSizeFitter>();
+        fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+        fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+        var scroll = logPanel.GetComponent<ScrollRect>();
+        if (scroll == null)
+            scroll = logPanel.AddComponent<ScrollRect>();
+        scroll.content = bodyRect;
+        scroll.viewport = viewport;
+        scroll.horizontal = false;
+        scroll.vertical = true;
+        scroll.movementType = ScrollRect.MovementType.Clamped;
+        scroll.inertia = true;
+        scroll.scrollSensitivity = 40f;
+        scroll.verticalScrollbar = null;
+        scroll.horizontalScrollbar = null;
+    }
+
+    public static void RefreshLogContentSize(TextMeshProUGUI logBody)
+    {
+        if (logBody == null)
+            return;
+
+        logBody.ForceMeshUpdate();
+        LayoutRebuilder.ForceRebuildLayoutImmediate(logBody.rectTransform);
+        Canvas.ForceUpdateCanvases();
     }
 
     public static TextMeshProUGUI CreateTmp(Transform parent, string name, float size, TextAlignmentOptions align, TMP_FontAsset font)

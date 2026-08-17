@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1a2a3a4b1b2c3d4e5f678901234aa51, type: 3}
+  m_Name: DemonSkillCatalog
+  m_EditorClassIdentifier: Assembly-CSharp::DemonSkillCatalog
+  panelUnlockStage: 11
+  skills:
+  - id: 1
+    displayName: "\uBC18\uC8FC \uD2B8\uB9AC\uC624"
+    icon: {fileID: -4247750706010559521, guid: fe0c87116abd89749a4d9098247ddd04, type: 3}
+    unlockStage: 11
+    usesPerStage: 1
+    effectType: 1
+    effectValue: 10
+  - id: 2
+    displayName: "\uC6E8\uB529\uD50C\uB798\uB108"
+    icon: {fileID: -6557209856017570972, guid: 849e48ac45f11764e9fbc71a5f7a348d, type: 3}
+    unlockStage: 11
+    usesPerStage: 1
+    effectType: 2
+    effectValue: 30

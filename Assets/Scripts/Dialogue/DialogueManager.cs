@@ -95,6 +95,7 @@ public class DialogueManager : MonoBehaviour
     private bool _isTyping;
     private Sprite _cachedNpcSprite;
     private bool _npcPortraitActive;
+    private bool _npcHiddenUntilLucia;
     private bool _lineFullyShown;
     private bool _autoEnabled;
     private bool _skipRequested;
@@ -104,6 +105,7 @@ public class DialogueManager : MonoBehaviour
     private Coroutine _rushCoroutine;
     private GameObject _logPanelRoot;
     private TextMeshProUGUI _logBodyText;
+    private Coroutine _refreshLogLayoutCoroutine;
     private string _fullLineText = "";
     private float _currentTypingSpeed;
     private float _currentAutoDelay;
@@ -112,6 +114,10 @@ public class DialogueManager : MonoBehaviour
     private bool _protagonistRevealed;
 
     private AudioSource _sfxSource;
+    private List<DialogueLine> _insertedParentLines;
+    private int _insertedParentIndex = -1;
+    private bool _playingInserted;
+    private Action _onInsertedFinished;
 
     /// <summary>외부 이벤트(이름 입력·암전 등) 대기 중인지</summary>
     public bool IsWaitingForExternalEvent => _waitingForExternalEvent;
@@ -295,9 +301,14 @@ public class DialogueManager : MonoBehaviour
         _protagonistRevealed = false;
         _cachedNpcSprite = null;
         _npcPortraitActive = false;
+        _npcHiddenUntilLucia = false;
         _currentTypingSpeed = typingSpeed;
         _currentAutoDelay = autoDelayAfterLine;
         _logEntries.Clear();
+        _playingInserted = false;
+        _insertedParentLines = null;
+        _insertedParentIndex = -1;
+        _onInsertedFinished = null;
 
         ResolveStoryImage();
         ResolveNpcImage();
@@ -365,6 +376,54 @@ public class DialogueManager : MonoBehaviour
         _waitingForExternalEvent = false;
         SetNextButtonVisible(true);
         AdvanceToNextLine();
+    }
+
+    /// <summary>
+    /// 메인 대사를 잠시 멈추고 삽입 대사를 재생합니다. 끝나면 메인 이벤트 대기로 돌아갑니다.
+    /// </summary>
+    public void PlayInsertedSequence(IReadOnlyList<DialogueLine> extraLines, Action onFinished)
+    {
+        if (extraLines == null || extraLines.Count == 0)
+        {
+            onFinished?.Invoke();
+            return;
+        }
+
+        if (!_playingInserted)
+        {
+            _insertedParentLines = new List<DialogueLine>(_lines);
+            _insertedParentIndex = _index;
+        }
+
+        _playingInserted = true;
+        _onInsertedFinished = onFinished;
+        _skipRequested = false;
+        _waitingForExternalEvent = false;
+        _autoEnabled = false;
+
+        if (_autoCoroutine != null)
+        {
+            StopCoroutine(_autoCoroutine);
+            _autoCoroutine = null;
+        }
+
+        if (_typingCoroutine != null)
+        {
+            StopCoroutine(_typingCoroutine);
+            _typingCoroutine = null;
+        }
+
+        _lines.Clear();
+        foreach (var line in extraLines)
+        {
+            if (line != null)
+                _lines.Add(line);
+        }
+
+        _index = 0;
+        _isPlaying = true;
+        SetNextButtonVisible(true);
+        ShowCurrentLine();
     }
 
     public void SetPortraitSprites(Sprite defaultSprite, Sprite happy, Sprite nervous)
@@ -541,6 +600,15 @@ public class DialogueManager : MonoBehaviour
 
     private void FinishDialogue()
     {
+        if (_playingInserted)
+        {
+            RestoreInsertedParent();
+            var callback = _onInsertedFinished;
+            _onInsertedFinished = null;
+            callback?.Invoke();
+            return;
+        }
+
         _isPlaying = false;
         _isTyping = false;
         _lineFullyShown = false;
@@ -552,6 +620,26 @@ public class DialogueManager : MonoBehaviour
         onDialogueFinished?.Invoke();
     }
 
+    private void RestoreInsertedParent()
+    {
+        _playingInserted = false;
+        _skipRequested = false;
+        _autoEnabled = false;
+
+        if (_insertedParentLines != null)
+        {
+            _lines.Clear();
+            _lines.AddRange(_insertedParentLines);
+            _index = Mathf.Clamp(_insertedParentIndex, 0, Mathf.Max(0, _lines.Count - 1));
+        }
+
+        _insertedParentLines = null;
+        _insertedParentIndex = -1;
+        _isPlaying = true;
+        _waitingForExternalEvent = true;
+        SetNextButtonVisible(false);
+    }
+
     private void HandleEvent(string eventId)
     {
         // 외부에서 끝날 때까지 대기해야 하는 이벤트들
@@ -559,7 +647,9 @@ public class DialogueManager : MonoBehaviour
         {
             case "RequestPlayerName":
             case "FadeToBlack":
+            case "FadeFromBlack":
             case "GoToStageSelect":
+            case "SelectBooks":
                 _waitingForExternalEvent = true;
                 SetNextButtonVisible(false);
                 OnCustomEvent?.Invoke(eventId);
@@ -579,6 +669,11 @@ public class DialogueManager : MonoBehaviour
                 OnCustomEvent?.Invoke(eventId);
                 break;
 
+            case "HideNpc":
+                HideNpcPortrait(clearSprite: true);
+                _npcHiddenUntilLucia = true;
+                break;
+
             default:
                 OnCustomEvent?.Invoke(eventId);
                 break;
@@ -588,6 +683,12 @@ public class DialogueManager : MonoBehaviour
     private void ApplyVisuals(DialogueLine line)
     {
         ResolveNpcImage();
+
+        if (line != null && line.eventId == "HideNpc")
+        {
+            HideNpcPortrait(clearSprite: true);
+            _npcHiddenUntilLucia = true;
+        }
 
         string rawSpeaker = line.speakerName ?? "";
         string displaySpeaker = FormatSpeakerName(rawSpeaker);
@@ -657,8 +758,14 @@ public class DialogueManager : MonoBehaviour
                 characterImage.sprite = portraitDefault;
         }
 
+        bool hideNpcThisLine = _npcHiddenUntilLucia && !IsLuciaSpeaker(rawSpeaker);
+        if (hideNpcThisLine)
+            HideNpcPortrait(clearSprite: true);
+        else if (isNpc && IsLuciaSpeaker(rawSpeaker))
+            _npcHiddenUntilLucia = false;
+
         // NPC 스프라이트 갱신
-        if (isNpc)
+        if (!hideNpcThisLine && isNpc)
         {
             Sprite npcSprite = line.npcSprite != null
                 ? line.npcSprite
@@ -825,6 +932,11 @@ public class DialogueManager : MonoBehaviour
         return speaker == "나레이션" || speaker == "해설" || speaker == "Narration" || speaker == "시스템";
     }
 
+    private static bool IsLuciaSpeaker(string speaker)
+    {
+        return !string.IsNullOrWhiteSpace(speaker) && speaker.Trim() == "루시아";
+    }
+
     private void ApplyCharacterPosition(CharacterPosition position)
     {
         if (characterImage == null)
@@ -970,6 +1082,9 @@ public class DialogueManager : MonoBehaviour
 
     private void ToggleAuto()
     {
+        if (_waitingForExternalEvent)
+            return;
+
         _autoEnabled = !_autoEnabled;
         if (_autoEnabled && _lineFullyShown && !_isTyping)
             RestartAutoTimer();
@@ -982,6 +1097,9 @@ public class DialogueManager : MonoBehaviour
 
     private void TriggerSkip()
     {
+        if (_waitingForExternalEvent || _playingInserted)
+            return;
+
         // Skip: 남은 대사를 빠르게 넘김 (이벤트는 유지)
         _skipRequested = true;
         _autoEnabled = false;
@@ -1009,6 +1127,7 @@ public class DialogueManager : MonoBehaviour
             var line = _lines[_index];
             if (!string.IsNullOrWhiteSpace(line.eventId) &&
                 (line.eventId == "RequestPlayerName" || line.eventId == "FadeToBlack" ||
+                 line.eventId == "FadeFromBlack" || line.eventId == "SelectBooks" ||
                  line.eventId == "AcceleratePraise" || line.eventId == "AcceleratePraiseThenFade"))
             {
                 // 중요 이벤트는 Skip으로 건너뛰지 않고 실행
@@ -1045,16 +1164,44 @@ public class DialogueManager : MonoBehaviour
     private void ToggleLog()
     {
         EnsureLogPanel();
+        if (_logPanelRoot == null)
+            return;
+
         bool show = !_logPanelRoot.activeSelf;
         _logPanelRoot.SetActive(show);
 
-        if (show && _logBodyText != null)
+        if (!show || _logBodyText == null)
+            return;
+
+        var sb = new StringBuilder();
+        foreach (var entry in _logEntries)
+            sb.AppendLine(entry);
+        _logBodyText.text = sb.ToString();
+        RefreshLogLayout();
+    }
+
+    private void RefreshLogLayout()
+    {
+        if (_refreshLogLayoutCoroutine != null)
+            StopCoroutine(_refreshLogLayoutCoroutine);
+        _refreshLogLayoutCoroutine = StartCoroutine(RefreshLogLayoutCoroutine());
+    }
+
+    private IEnumerator RefreshLogLayoutCoroutine()
+    {
+        yield return null;
+        Canvas.ForceUpdateCanvases();
+        DialogueUiBuilder.RefreshLogContentSize(_logBodyText);
+        yield return null;
+        DialogueUiBuilder.RefreshLogContentSize(_logBodyText);
+        if (_logPanelRoot != null)
         {
-            var sb = new StringBuilder();
-            foreach (var entry in _logEntries)
-                sb.AppendLine(entry);
-            _logBodyText.text = sb.ToString();
+            var scroll = _logPanelRoot.GetComponent<ScrollRect>();
+            if (scroll != null)
+                scroll.verticalNormalizedPosition = 1f;
         }
+
+        _refreshLogLayoutCoroutine = null;
     }
 
     private void OpenSettings()
@@ -1145,14 +1292,34 @@ public class DialogueManager : MonoBehaviour
             _expressionMap["upset"] = portraitNervous;
         }
 
-        if (expressionSprites == null)
+        if (expressionSprites != null)
+        {
+            foreach (var entry in expressionSprites)
+            {
+                if (entry == null || entry.sprite == null || string.IsNullOrWhiteSpace(entry.id))
+                    continue;
+                _expressionMap[entry.id.Trim()] = entry.sprite;
+            }
+        }
+
+        CopyExpressionAlias("nervous", "smallEyes", "surprise", "dizzy", "upset");
+        CopyExpressionAlias("dark", "eyesOnly");
+        CopyExpressionAlias("scheming", "shameless");
+        CopyExpressionAlias("cry", "plead", "sad");
+        CopyExpressionAlias("happy", "smile");
+        CopyExpressionAlias("angry", "mad");
+    }
+
+    private void CopyExpressionAlias(string sourceKey, params string[] aliases)
+    {
+        if (!_expressionMap.TryGetValue(sourceKey, out var sprite) || sprite == null)
             return;
 
-        foreach (var entry in expressionSprites)
+        foreach (var alias in aliases)
         {
-            if (entry == null || entry.sprite == null || string.IsNullOrWhiteSpace(entry.id))
+            if (string.IsNullOrWhiteSpace(alias) || _expressionMap.ContainsKey(alias))
                 continue;
-            _expressionMap[entry.id.Trim()] = entry.sprite;
+            _expressionMap[alias] = sprite;
         }
     }
 
@@ -1401,48 +1568,79 @@ public class DialogueManager : MonoBehaviour
             _logPanelRoot = result.logPanelRoot;
         if (result.logBodyText != null)
             _logBodyText = result.logBodyText;
+        if (_logPanelRoot != null)
+            DialogueUiBuilder.SetupLogPanelScrolling(_logPanelRoot, ref _logBodyText);
     }
 
     private void EnsureLogPanel()
     {
-        if (_logPanelRoot != null)
-            return;
-
-        if (DialogueUiBuilder.TryFindExisting(out var found) && found.logPanelRoot != null)
+        if (_logPanelRoot == null)
         {
-            _logPanelRoot = found.logPanelRoot;
-            _logBodyText = found.logBodyText;
-            return;
+            if (DialogueUiBuilder.TryFindExisting(out var found) && found.logPanelRoot != null)
+            {
+                _logPanelRoot = found.logPanelRoot;
+                _logBodyText = found.logBodyText;
+            }
+
+            if (_logPanelRoot == null)
+            {
+                Transform logTransform = null;
+                var canvasGo = GameObject.Find(DialogueUiBuilder.CanvasName);
+                if (canvasGo != null)
+                    logTransform = canvasGo.transform.Find("DialogueLogPanel");
+
+                if (logTransform == null)
+                {
+                    var rects = FindObjectsByType<RectTransform>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+                    for (int i = 0; i < rects.Length; i++)
+                    {
+                        if (rects[i] != null && rects[i].name == "DialogueLogPanel")
+                        {
+                            logTransform = rects[i];
+                            break;
+                        }
+                    }
+                }
+
+                if (logTransform != null)
+                {
+                    _logPanelRoot = logTransform.gameObject;
+                    _logBodyText = DialogueUiBuilder.FindLogBodyText(logTransform);
+                }
+            }
+
+            if (_logPanelRoot == null)
+            {
+                var canvas = GameObject.Find(DialogueUiBuilder.CanvasName)?.GetComponent<Canvas>();
+                if (canvas == null)
+                    canvas = FindAnyObjectByType<Canvas>();
+                if (canvas == null)
+                    return;
+
+                _logPanelRoot = new GameObject("DialogueLogPanel");
+                _logPanelRoot.transform.SetParent(canvas.transform, false);
+                var img = _logPanelRoot.AddComponent<Image>();
+                img.color = new Color(0f, 0f, 0f, 0.85f);
+                var rect = _logPanelRoot.GetComponent<RectTransform>();
+                rect.anchorMin = new Vector2(0.15f, 0.15f);
+                rect.anchorMax = new Vector2(0.85f, 0.85f);
+                rect.offsetMin = Vector2.zero;
+                rect.offsetMax = Vector2.zero;
+
+                _logBodyText = DialogueUiBuilder.CreateTmp(_logPanelRoot.transform, "LogBody", 22, TextAlignmentOptions.TopLeft, dialogueFont);
+                _logBodyText.text = "대화 로그";
+
+                var realClose = DialogueUiBuilder.CreateUiButton(_logPanelRoot.transform, "CloseLog", "Close",
+                    new Vector2(0.4f, 0.02f), new Vector2(0.6f, 0.12f), dialogueFont);
+                realClose.onClick.AddListener(() => _logPanelRoot.SetActive(false));
+                _logPanelRoot.SetActive(false);
+            }
         }
 
-        var canvas = GameObject.Find(DialogueUiBuilder.CanvasName)?.GetComponent<Canvas>();
-        if (canvas == null)
-            canvas = FindAnyObjectByType<Canvas>();
-        if (canvas == null)
-            return;
+        if (_logBodyText == null && _logPanelRoot != null)
+            _logBodyText = DialogueUiBuilder.FindLogBodyText(_logPanelRoot.transform);
 
-        // 간단한 런타임 폴백 로그 패널
-        _logPanelRoot = new GameObject("DialogueLogPanel");
-        _logPanelRoot.transform.SetParent(canvas.transform, false);
-        var img = _logPanelRoot.AddComponent<Image>();
-        img.color = new Color(0f, 0f, 0f, 0.85f);
-        var rect = _logPanelRoot.GetComponent<RectTransform>();
-        rect.anchorMin = new Vector2(0.15f, 0.15f);
-        rect.anchorMax = new Vector2(0.85f, 0.85f);
-        rect.offsetMin = Vector2.zero;
-        rect.offsetMax = Vector2.zero;
-
-        _logBodyText = DialogueUiBuilder.CreateTmp(_logPanelRoot.transform, "LogBody", 22, TextAlignmentOptions.TopLeft, dialogueFont);
-        var bodyRect = _logBodyText.rectTransform;
-        bodyRect.anchorMin = new Vector2(0.05f, 0.15f);
-        bodyRect.anchorMax = new Vector2(0.95f, 0.95f);
-        bodyRect.offsetMin = Vector2.zero;
-        bodyRect.offsetMax = Vector2.zero;
-
-        var realClose = DialogueUiBuilder.CreateUiButton(_logPanelRoot.transform, "CloseLog", "Close",
-            new Vector2(0.4f, 0.02f), new Vector2(0.6f, 0.12f), dialogueFont);
-        realClose.onClick.AddListener(() => _logPanelRoot.SetActive(false));
-        _logPanelRoot.SetActive(false);
+        DialogueUiBuilder.SetupLogPanelScrolling(_logPanelRoot, ref _logBodyText);
     }
 
     /// <summary>

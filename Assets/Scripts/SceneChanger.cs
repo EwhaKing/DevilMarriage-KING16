@@ -47,6 +47,21 @@ public class SceneChanger : MonoBehaviour
         var dialogueManager = FindAnyObjectByType<DialogueManager>();
         if (dialogueManager != null)
             dialogueManager.SetPortraitSprites(portraitDefault, portraitHappy, portraitNervous);
+
+        WireNamedButton("RertryButton", ClickRetry);
+    }
+
+    private static void WireNamedButton(string objectName, UnityEngine.Events.UnityAction action)
+    {
+        var go = GameObject.Find(objectName);
+        if (go == null)
+            return;
+
+        var button = go.GetComponent<Button>();
+        if (button == null)
+            return;
+
+        button.onClick.AddListener(action);
     }
 
     public void GoToTitleScreen()
@@ -55,15 +70,32 @@ public class SceneChanger : MonoBehaviour
         ChangeSceneByName(SceneNames.Title);
     }
 
+    public void StartGame()
+    {
+        var flow = GameFlowManager.EnsureExists();
+        if (flow != null)
+            flow.StartFromTitle();
+        else if (StageProgressManager.HasPlayedBefore)
+            ChangeSceneByName(SceneNames.StageSelect);
+        else
+            ChangeSceneByName(SceneNames.Prologue);
+    }
+
     public void GoToPrologue()
     {
         GameFlowManager.EnsureExists();
         ChangeSceneByName(SceneNames.Prologue);
     }
 
+    public void GoToDevilPage()
+    {
+        GameFlowManager.EnsureExists()?.GoToDevilPage();
+    }
+
     public void GoToStageSelect()
     {
         GameFlowManager.EnsureExists();
+        StageProgressManager.MarkHasPlayed();
         ChangeSceneByName(SceneNames.StageSelect);
     }
 
@@ -82,20 +114,21 @@ public class SceneChanger : MonoBehaviour
 
     public void GoToStoryScene()
     {
-        ChangeSceneByName("StoryScene");
+        if (GameFlowManager.Instance != null && GameFlowManager.Instance.CurrentStage != null)
+            GameFlowManager.Instance.BeginClosingStory();
+        else
+            ChangeSceneByName(SceneNames.Story);
     }
 
-    // ==========================================
-    // 새로 추가된 재시도 기능
-    // ==========================================
     public void ClickRetry()
     {
-        // 만약 GameFlowManager가 현재 스테이지 정보를 유지하고 있다면 
-        // GoToCurrentStagePlay(); 를 호출하는 방식도 가능합니다.
-        
-        // 여기서는 실패 시 저장해둔 이전 스테이지 이름을 불러와 로드합니다.
-        // 저장된 값이 없을 경우를 대비해 "StagePlayScene"을 기본값으로 둡니다.
-        string lastStage = PlayerPrefs.GetString("LastStage", "StagePlayScene");
+        if (GameFlowManager.Instance != null && GameFlowManager.Instance.CurrentStage != null)
+        {
+            GameFlowManager.Instance.GoToStagePlay();
+            return;
+        }
+
+        string lastStage = PlayerPrefs.GetString("LastStage", SceneNames.StagePlay);
         ChangeSceneByName(lastStage);
     }
     // ==========================================

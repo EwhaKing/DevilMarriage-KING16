@@ -4,7 +4,9 @@ using UnityEngine.SceneManagement;
 
 /// <summary>
 /// 게임 전체 씬 흐름을 관리합니다.
-/// Title → Prologue → StageSelect → Story(Open) → StagePlay → Story(Close) → StageSelect
+/// Title → Prologue → StageSelect → Story(Open) → StagePlay
+///   성공 → StageClear → Story(Close) → StageSelect
+///   실패 → GameOver → StagePlay 재시작
 /// </summary>
 public class GameFlowManager : MonoBehaviour
 {
@@ -109,13 +111,19 @@ public class GameFlowManager : MonoBehaviour
             ? SceneNames.StagePlay
             : CurrentStage.playSceneName;
 
+        PlayerPrefs.SetString("LastStage", sceneName);
         LoadScene(sceneName);
     }
 
     public void OnStagePlayCleared()
     {
         CurrentStoryPhase = StoryPhase.Closing;
-        BeginClosingStory();
+        LoadScene(SceneNames.StageClear);
+    }
+
+    public void OnStagePlayFailed()
+    {
+        LoadScene(SceneNames.GameOver);
     }
 
     public void OnOpeningStoryFinished()
@@ -139,7 +147,21 @@ public class GameFlowManager : MonoBehaviour
 
     public void GoToStageSelect()
     {
+        StageProgressManager.MarkHasPlayed();
         LoadScene(SceneNames.StageSelect);
+    }
+
+    public void StartFromTitle()
+    {
+        if (StageProgressManager.HasPlayedBefore)
+            LoadScene(SceneNames.StageSelect);
+        else
+            GoToPrologue();
+    }
+
+    public void GoToDevilPage()
+    {
+        LoadScene(SceneNames.DevilPage);
     }
 
     public void GoToPrologue()
