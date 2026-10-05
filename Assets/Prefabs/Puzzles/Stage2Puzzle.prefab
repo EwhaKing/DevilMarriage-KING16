@@ -419,10 +419,10 @@ LineRenderer:
   - {x: 1.4100001, y: 2.8, z: 0}
   - {x: 2.9099998, y: 0.49999994, z: 0}
   m_Parameters:
-  serializedVersion: 3
+    serializedVersion: 3
     widthMultiplier: 1
     widthCurve:
-    serializedVersion: 2
+      serializedVersion: 2
       m_Curve:
       - serializedVersion: 3
         time: 0
@@ -446,9 +446,9 @@ LineRenderer:
       m_PostInfinity: 2
       m_RotationOrder: 4
     colorGradient:
-    serializedVersion: 2
-      key0: {r: 0.4509804, g: 0.41960785, b: 0.5019608, a: 0.54901963}
-      key1: {r: 0.4509804, g: 0.41960785, b: 0.5019608, a: 0.54901963}
+      serializedVersion: 2
+      key0: {r: 0, g: 0, b: 0, a: 0}
+      key1: {r: 0.1882353, g: 0.16078432, b: 0.80784315, a: 0.5019608}
       key2: {r: 0, g: 0, b: 0, a: 0}
       key3: {r: 0, g: 0, b: 0, a: 0}
       key4: {r: 0, g: 0, b: 0, a: 0}
@@ -480,7 +480,7 @@ LineRenderer:
     alignment: 0
     textureMode: 0
     textureScale: {x: 1, y: 1}
-    shadowBias: 0.5
+    shadowBias: 0
     generateLightingData: 0
   m_UseWorldSpace: 1
   m_Loop: 0
@@ -2537,29 +2537,29 @@ LineRenderer:
     serializedVersion: 3
     widthMultiplier: 1
     widthCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
         value: 0.1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
         inWeight: 0.33333334
         outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 1
+      - serializedVersion: 3
+        time: 1
         value: 0.1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
         inWeight: 0.33333334
         outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
     colorGradient:
       serializedVersion: 2
       key0: {r: 0.4509804, g: 0.41960785, b: 0.5019608, a: 0.54901963}
@@ -2616,7 +2616,7 @@ MonoBehaviour:
   runeB: {fileID: 8530734385405771332}
   runeIndexA: 5
   runeIndexB: 1
-    waypoints: []
+  waypoints: []
   isMandatoryPath: 1
   inactiveColor: {r: 0.45, g: 0.42, b: 0.5, a: 0.55}
   activeColor: {r: 1, g: 0.18, b: 0.12, a: 1}
