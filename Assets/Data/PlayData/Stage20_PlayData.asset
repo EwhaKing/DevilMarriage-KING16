@@ -17,4 +17,5 @@ MonoBehaviour:
   maxSanity: 100
   maxRatBlood: 15
   bloodCostPerMove: 1
-  puzzlePrefab: {fileID: 0}
+  puzzlePrefab: {fileID: 1380724177895306697, guid: dec81c554c7db274589055945999af5c, type: 3}
+  availableDemonSkills: 

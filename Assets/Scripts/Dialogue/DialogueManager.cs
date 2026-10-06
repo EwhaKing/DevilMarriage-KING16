@@ -98,6 +98,19 @@ public class DialogueManager : MonoBehaviour
     private bool _npcHiddenUntilLucia;
     private bool _lineFullyShown;
     private bool _autoEnabled;
+    private ColorBlock _autoOffColors;
+    private Vector3 _autoOffScale = Vector3.one;
+    private bool _autoVisualCached;
+
+    private bool AutoEnabled
+    {
+        get => _autoEnabled;
+        set
+        {
+            _autoEnabled = value;
+            RefreshAutoButtonVisual();
+        }
+    }
     private bool _skipRequested;
     private bool _waitingForExternalEvent;
     private Coroutine _typingCoroutine;
@@ -297,7 +310,7 @@ public class DialogueManager : MonoBehaviour
         _waitingForExternalEvent = false;
         _rushThenFadePending = false;
         _rushModeActive = false;
-        _autoEnabled = false;
+        AutoEnabled = false;
         _protagonistRevealed = false;
         _cachedNpcSprite = null;
         _npcPortraitActive = false;
@@ -339,7 +352,7 @@ public class DialogueManager : MonoBehaviour
     {
         _rushModeActive = true;
         // 칭찬 2줄만 자동 넘김. 방 장면 등 다른 구간에서는 EndRushPresentation이 auto를 끈다.
-        _autoEnabled = true;
+        AutoEnabled = true;
 
         if (_rushCoroutine != null)
             StopCoroutine(_rushCoroutine);
@@ -351,7 +364,7 @@ public class DialogueManager : MonoBehaviour
     {
         _rushModeActive = false;
         _rushThenFadePending = false;
-        _autoEnabled = false;
+        AutoEnabled = false;
         _currentTypingSpeed = typingSpeed;
         _currentAutoDelay = autoDelayAfterLine;
 
@@ -399,7 +412,7 @@ public class DialogueManager : MonoBehaviour
         _onInsertedFinished = onFinished;
         _skipRequested = false;
         _waitingForExternalEvent = false;
-        _autoEnabled = false;
+        AutoEnabled = false;
 
         if (_autoCoroutine != null)
         {
@@ -624,7 +637,7 @@ public class DialogueManager : MonoBehaviour
     {
         _playingInserted = false;
         _skipRequested = false;
-        _autoEnabled = false;
+        AutoEnabled = false;
 
         if (_insertedParentLines != null)
         {
@@ -967,13 +980,7 @@ public class DialogueManager : MonoBehaviour
         if (string.IsNullOrEmpty(raw))
             return "";
 
-        var name = PlayerNameManager.PlayerName;
-        var formatted = raw
-            .Replace("{$playerName}", name)
-            .Replace("{playerName}", name)
-            .Replace("[주인공]", name);
-
-        return formatted.Replace("\u2026", "...");
+        return PlayerNameManager.FormatDialogue(raw).Replace("\u2026", "...");
     }
 
     private static string FormatSpeakerName(string speaker)
@@ -981,10 +988,7 @@ public class DialogueManager : MonoBehaviour
         if (string.IsNullOrWhiteSpace(speaker))
             return "";
 
-        if (IsProtagonistSpeaker(speaker))
-            return PlayerNameManager.PlayerName;
-
-        return speaker;
+        return PlayerNameManager.FormatDialogue(speaker.Trim());
     }
 
     private static bool IsProtagonistSpeaker(string speaker)
@@ -1085,7 +1089,7 @@ public class DialogueManager : MonoBehaviour
         if (_waitingForExternalEvent)
             return;
 
-        _autoEnabled = !_autoEnabled;
+        AutoEnabled = !_autoEnabled;
         if (_autoEnabled && _lineFullyShown && !_isTyping)
             RestartAutoTimer();
         else if (!_autoEnabled && _autoCoroutine != null)
@@ -1102,7 +1106,7 @@ public class DialogueManager : MonoBehaviour
 
         // Skip: 남은 대사를 빠르게 넘김 (이벤트는 유지)
         _skipRequested = true;
-        _autoEnabled = false;
+        AutoEnabled = false;
 
         if (_isTyping)
             CompleteTypingImmediately();
@@ -1248,6 +1252,42 @@ public class DialogueManager : MonoBehaviour
             settingButton.onClick.RemoveAllListeners();
             settingButton.onClick.AddListener(OpenSettings);
         }
+
+        RefreshAutoButtonVisual();
+    }
+
+    private void RefreshAutoButtonVisual()
+    {
+        if (autoButton == null)
+            return;
+
+        if (!_autoVisualCached)
+        {
+            _autoOffColors = autoButton.colors;
+            _autoOffScale = autoButton.transform.localScale;
+            _autoVisualCached = true;
+        }
+
+        var colors = _autoOffColors;
+        var shown = _autoOffColors.normalColor;
+        if (_autoEnabled)
+        {
+            var on = new Color(1f, 0.72f, 0.22f, 1f);
+            colors.normalColor = on;
+            colors.highlightedColor = new Color(1f, 0.86f, 0.42f, 1f);
+            colors.pressedColor = new Color(0.78f, 0.48f, 0.1f, 1f);
+            colors.selectedColor = on;
+            shown = on;
+            autoButton.transform.localScale = _autoOffScale * 0.92f;
+        }
+        else
+        {
+            autoButton.transform.localScale = _autoOffScale;
+        }
+
+        autoButton.colors = colors;
+        if (autoButton.targetGraphic != null)
+            autoButton.targetGraphic.CrossFadeColor(shown, 0f, true, true);
     }
 
     /// <summary>

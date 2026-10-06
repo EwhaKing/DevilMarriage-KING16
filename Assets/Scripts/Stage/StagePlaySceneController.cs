@@ -109,6 +109,8 @@ public class StagePlaySceneController : MonoBehaviour
 
         if (stage != null && stage.stageNumber == 33 && GetComponent<Stage33PlayIntroController>() == null)
             gameObject.AddComponent<Stage33PlayIntroController>();
+
+        BindSceneRetryButton();
     }
 
     private void OnDestroy()
@@ -236,6 +238,41 @@ public class StagePlaySceneController : MonoBehaviour
             return;
 
         resourceManager.SetRatBloodCapacity(pathCount);
+    }
+
+    /// <summary>
+    /// 씬의 RetryButton을 현재 스테이지 즉시 리플레이에 연결합니다.
+    /// Inspector에 버튼이 비어 있으면 이름이 RetryButton인 버튼을 찾습니다.
+    /// </summary>
+    private void BindSceneRetryButton()
+    {
+        if (retryButton == null)
+        {
+            var buttonObject = GameObject.Find("RetryButton");
+            if (buttonObject != null)
+                retryButton = buttonObject.GetComponent<Button>();
+        }
+
+        if (retryButton == null)
+            return;
+
+        retryButton.onClick.RemoveListener(ReplayCurrentStage);
+        retryButton.onClick.AddListener(ReplayCurrentStage);
+    }
+
+    /// <summary>
+    /// 확인 창 없이 지금 스테이지의 StagePlayScene을 처음부터 다시 엽니다.
+    /// </summary>
+    public void ReplayCurrentStage()
+    {
+        var flow = GameFlowManager.EnsureExists();
+        if (flow != null && flow.CurrentStage != null)
+        {
+            flow.GoToStagePlay();
+            return;
+        }
+
+        SceneManager.LoadScene(SceneNames.StagePlay);
     }
 
     private void GoToGameOverScene()

@@ -49,6 +49,15 @@ public class SceneChanger : MonoBehaviour
             dialogueManager.SetPortraitSprites(portraitDefault, portraitHappy, portraitNervous);
 
         WireNamedButton("RertryButton", ClickRetry);
+
+        var popup = SettingsPopupHost.Ensure();
+        if (popup != null)
+            settingPopup = popup;
+    }
+
+    public void BindSettingsPopup(GameObject popup)
+    {
+        settingPopup = popup;
     }
 
     private static void WireNamedButton(string objectName, UnityEngine.Events.UnityAction action)

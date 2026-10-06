@@ -17,3 +17,4 @@ MonoBehaviour:
   maxSanity: 100
   maxRatBlood: 15
   bloodCostPerMove: 1
+  puzzlePrefab: {fileID: 3933769970861300990, guid: 1d27013beee30b447b733309ef299085, type: 3}

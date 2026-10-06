@@ -34,6 +34,7 @@ public class PrologueSceneController : MonoBehaviour
     private CanvasGroup _fadeGroup;
     private GameObject _namePromptRoot;
     private TMP_InputField _nameInput;
+    private HangulInputField _hangulInput;
     private bool _nameSubmitted;
 
     private void Start()
@@ -168,14 +169,18 @@ public class PrologueSceneController : MonoBehaviour
     {
         EnsureNamePrompt();
         _nameSubmitted = false;
+
+        if (_hangulInput != null)
+        {
+            _hangulInput.SetCommitted(PlayerNameManager.HasCustomName
+                ? PlayerNameManager.PlayerName
+                : string.Empty);
+        }
+
         _namePromptRoot.SetActive(true);
 
         if (_nameInput != null)
         {
-            // 저장된 이름이 있으면 미리 채우고, 없으면 빈 칸으로 입력받는다
-            _nameInput.text = PlayerNameManager.HasCustomName
-                ? PlayerNameManager.PlayerName
-                : string.Empty;
             _nameInput.Select();
             _nameInput.ActivateInputField();
         }
@@ -183,8 +188,11 @@ public class PrologueSceneController : MonoBehaviour
         while (!_nameSubmitted)
             yield return null;
 
-        var name = _nameInput != null && !string.IsNullOrWhiteSpace(_nameInput.text)
-            ? _nameInput.text.Trim()
+        if (_hangulInput != null && _namePromptRoot.activeSelf)
+            _hangulInput.CommitVisibleText();
+
+        var name = _hangulInput != null && !string.IsNullOrWhiteSpace(_hangulInput.CommittedText)
+            ? _hangulInput.CommittedText.Trim()
             : PlayerNameManager.PlayerName;
 
         PlayerNameManager.PlayerName = name;
@@ -396,6 +404,8 @@ public class PrologueSceneController : MonoBehaviour
         inputRect.offsetMax = Vector2.zero;
 
         _nameInput = inputObject.AddComponent<TMP_InputField>();
+        _hangulInput = inputObject.AddComponent<HangulInputField>();
+        var nameFont = FindKoreanFont();
         var textArea = new GameObject("Text Area");
         textArea.transform.SetParent(inputObject.transform, false);
         var textAreaRect = textArea.AddComponent<RectTransform>();
@@ -407,8 +417,12 @@ public class PrologueSceneController : MonoBehaviour
         var textObject = CreateText(textArea.transform, "Text", string.Empty, 26);
         textObject.color = Color.black;
         textObject.alignment = TextAlignmentOptions.MidlineLeft;
+        if (nameFont != null)
+            textObject.font = nameFont;
 
         var placeholder = CreateText(textArea.transform, "Placeholder", "이름", 26);
+        if (nameFont != null)
+            placeholder.font = nameFont;
         placeholder.fontStyle = FontStyles.Italic;
         placeholder.color = new Color(0.3f, 0.3f, 0.3f, 0.7f);
 
@@ -456,5 +470,21 @@ public class PrologueSceneController : MonoBehaviour
         rect.offsetMin = Vector2.zero;
         rect.offsetMax = Vector2.zero;
         return text;
+    }
+
+    private static TMP_FontAsset FindKoreanFont()
+    {
+        var texts = FindObjectsByType<TextMeshProUGUI>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        foreach (var text in texts)
+        {
+            if (text == null || text.font == null)
+                continue;
+
+            var fontName = text.font.name;
+            if (fontName.Contains("Noto") || fontName.Contains("KR") || fontName.Contains("Korean"))
+                return text.font;
+        }
+
+        return TMP_Settings.defaultFontAsset;
     }
 }

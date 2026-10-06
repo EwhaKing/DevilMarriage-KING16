@@ -57,12 +57,9 @@ public class Stage27PlayIntroController : MonoBehaviour
         foreach (var line in lines)
         {
             var parts = line.Split(new[] { '|' }, 2);
-            var speaker = parts[0];
-            if (speaker == "주인공")
-                speaker = PlayerNameManager.PlayerName;
-
+            var speaker = PlayerNameManager.FormatDialogue(parts[0]);
             _speakerText.text = speaker;
-            _bodyText.text = parts.Length > 1 ? parts[1] : string.Empty;
+            _bodyText.text = PlayerNameManager.FormatDialogue(parts.Length > 1 ? parts[1] : string.Empty);
             _waitingForAdvance = true;
 
             while (_waitingForAdvance)

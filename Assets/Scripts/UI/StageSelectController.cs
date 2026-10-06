@@ -67,6 +67,17 @@ public class StageSelectController : MonoBehaviour
         RefreshStageButtons();
         SetupCameraPan();
         ApplyMapLayerOrder();
+
+        var popup = SettingsPopupHost.Ensure();
+        if (popup != null)
+            BindSettingsPopup(popup);
+    }
+
+    public void BindSettingsPopup(GameObject popup)
+    {
+        settingPopup = popup;
+        if (settingPopup != null)
+            settingPopup.SetActive(false);
     }
 
     private void Start()
