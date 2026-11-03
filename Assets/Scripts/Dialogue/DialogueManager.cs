@@ -112,6 +112,8 @@ public class DialogueManager : MonoBehaviour
         }
     }
     private bool _skipRequested;
+    private bool _immediateSkip;
+    private bool _hideNarrationSpeakerName;
     private bool _waitingForExternalEvent;
     private Coroutine _typingCoroutine;
     private Coroutine _autoCoroutine;
@@ -382,11 +384,30 @@ public class DialogueManager : MonoBehaviour
     }
 
     /// <summary>
+    /// 스킵 시 남은 대사와 연출을 재생하지 않고 대화를 바로 끝냅니다.
+    /// </summary>
+    public void SetImmediateSkip(bool enabled)
+    {
+        _immediateSkip = enabled;
+    }
+
+    /// <summary>
+    /// 나레이션 대사에서 SpeakerName 칸을 비웁니다. 캐릭터 이름은 그대로 표시합니다.
+    /// </summary>
+    public void SetHideNarrationSpeakerName(bool hide)
+    {
+        _hideNarrationSpeakerName = hide;
+    }
+
+    /// <summary>
     /// 외부(예: 이름 입력창)에서 이벤트가 끝났을 때 호출하여 다음 줄로 넘어갑니다.
     /// </summary>
     public void NotifyExternalEventCompleted()
     {
         _waitingForExternalEvent = false;
+        if (!_isPlaying)
+            return;
+
         SetNextButtonVisible(true);
         AdvanceToNextLine();
     }
@@ -707,7 +728,11 @@ public class DialogueManager : MonoBehaviour
         string displaySpeaker = FormatSpeakerName(rawSpeaker);
 
         if (speakerNameText != null)
-            speakerNameText.text = displaySpeaker;
+        {
+            speakerNameText.text = _hideNarrationSpeakerName && IsNarrationName(rawSpeaker)
+                ? string.Empty
+                : displaySpeaker;
+        }
 
         bool isNarration = IsNarrationSpeaker(rawSpeaker);
         bool isProtagonist = IsProtagonistSpeaker(rawSpeaker) || IsProtagonistSpeaker(displaySpeaker);
@@ -942,7 +967,16 @@ public class DialogueManager : MonoBehaviour
         if (string.IsNullOrWhiteSpace(speaker))
             return true;
 
-        return speaker == "나레이션" || speaker == "해설" || speaker == "Narration" || speaker == "시스템";
+        return IsNarrationName(speaker) || speaker.Trim() == "시스템";
+    }
+
+    private static bool IsNarrationName(string speaker)
+    {
+        if (string.IsNullOrWhiteSpace(speaker))
+            return false;
+
+        speaker = speaker.Trim();
+        return speaker == "나레이션" || speaker == "해설" || speaker == "Narration";
     }
 
     private static bool IsLuciaSpeaker(string speaker)
@@ -1101,6 +1135,17 @@ public class DialogueManager : MonoBehaviour
 
     private void TriggerSkip()
     {
+        if (_immediateSkip)
+        {
+            _playingInserted = false;
+            _onInsertedFinished = null;
+            _insertedParentLines = null;
+            _waitingForExternalEvent = false;
+            _rushThenFadePending = false;
+            FinishDialogue();
+            return;
+        }
+
         if (_waitingForExternalEvent || _playingInserted)
             return;
 

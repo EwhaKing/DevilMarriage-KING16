@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -21,6 +22,12 @@ public class StageSelectController : MonoBehaviour
     /// Stage 34는 해금만 하고 플레이는 이후 구현.
     /// </summary>
     public const int PlayableStageCount = 33;
+
+    /// <summary>
+    /// 현재 스테이지와 클릭한 스테이지의 번호 차이가 이 값 이상이면 걷지 않고 순간이동합니다.
+    /// </summary>
+    private const int TeleportMinStageGap = 5;
+    private const float TeleportFlashDuration = 0.2f;
 
     [Header("Stage Buttons")]
     [SerializeField] private StageSelectButtonEntry[] stageButtons;
@@ -45,6 +52,8 @@ public class StageSelectController : MonoBehaviour
     private Canvas _hudCanvas;
     private RectTransform _mapBounds;
     private StageSelectMapPlayer _mapPlayer;
+    private bool _teleporting;
+    private static Sprite _teleportFlashSprite;
 
     private void Awake()
     {
@@ -512,7 +521,7 @@ public class StageSelectController : MonoBehaviour
         if (_cameraPan != null && _cameraPan.DidDragThisPointer)
             return;
 
-        if (_mapPlayer != null && _mapPlayer.IsMoving)
+        if (_teleporting || (_mapPlayer != null && _mapPlayer.IsMoving))
             return;
 
         if (!StageProgressManager.IsStageUnlocked(stageNumber))
@@ -549,6 +558,12 @@ public class StageSelectController : MonoBehaviour
         if (fromStage == destinationStage)
             return;
 
+        if (Mathf.Abs(destinationStage - fromStage) >= TeleportMinStageGap)
+        {
+            StartCoroutine(TeleportToStageRoutine(destinationStage));
+            return;
+        }
+
         if (!TryBuildWalkRoute(fromStage, destinationStage, out var hops, out var stages))
         {
             PlacePlayerOnStage(destinationStage);
@@ -562,6 +577,114 @@ public class StageSelectController : MonoBehaviour
             PlacePlayerOnStage(destinationStage);
             SetStageButtonsInputEnabled(true);
         });
+    }
+
+    private IEnumerator TeleportToStageRoutine(int destinationStage)
+    {
+        _teleporting = true;
+        SetStageButtonsInputEnabled(false);
+        if (_cameraPan != null)
+            _cameraPan.InputLocked = true;
+
+        _mapPlayer.StopWalk();
+        var playerRect = _mapPlayer.transform as RectTransform;
+        var destination = FindStageButton(destinationStage);
+        if (destination != null)
+            _mapPlayer.FaceTowardWorldX(destination.position.x);
+
+        if (playerRect != null)
+            yield return PlayTeleportFlash(playerRect.position);
+
+        PlacePlayerOnStage(destinationStage);
+        FocusCameraOnStage(destinationStage);
+
+        if (playerRect != null)
+            yield return PlayTeleportFlash(playerRect.position);
+
+        if (_cameraPan != null)
+            _cameraPan.InputLocked = false;
+        SetStageButtonsInputEnabled(true);
+        _teleporting = false;
+    }
+
+    private IEnumerator PlayTeleportFlash(Vector3 worldPosition)
+    {
+        var parent = _mapPlayer != null ? _mapPlayer.transform.parent : transform;
+        var flash = new GameObject("TeleportFlash", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        flash.transform.SetParent(parent, false);
+        flash.transform.SetAsLastSibling();
+
+        var rect = flash.GetComponent<RectTransform>();
+        rect.anchorMin = new Vector2(0.5f, 0.5f);
+        rect.anchorMax = new Vector2(0.5f, 0.5f);
+        rect.pivot = new Vector2(0.5f, 0.5f);
+        rect.sizeDelta = new Vector2(280f, 280f);
+        rect.position = worldPosition;
+
+        var image = flash.GetComponent<Image>();
+        image.sprite = TeleportFlashSprite();
+        image.raycastTarget = false;
+        image.color = new Color(1f, 0.97f, 0.82f, 0f);
+
+        var coreObject = new GameObject("Core", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        coreObject.transform.SetParent(flash.transform, false);
+        var coreRect = coreObject.GetComponent<RectTransform>();
+        coreRect.anchorMin = Vector2.zero;
+        coreRect.anchorMax = Vector2.one;
+        coreRect.offsetMin = new Vector2(70f, 70f);
+        coreRect.offsetMax = new Vector2(-70f, -70f);
+        var core = coreObject.GetComponent<Image>();
+        core.sprite = image.sprite;
+        core.raycastTarget = false;
+        core.color = new Color(1f, 1f, 1f, 0f);
+
+        float elapsed = 0f;
+        while (elapsed < TeleportFlashDuration)
+        {
+            elapsed += Time.deltaTime;
+            float u = Mathf.Clamp01(elapsed / TeleportFlashDuration);
+            float alpha = u < 0.28f
+                ? Mathf.Lerp(0.15f, 1f, u / 0.28f)
+                : Mathf.Lerp(1f, 0f, (u - 0.28f) / 0.72f);
+            image.color = new Color(1f, 0.94f, 0.7f, alpha * 0.9f);
+            core.color = new Color(1f, 1f, 1f, alpha);
+            rect.localScale = Vector3.one * Mathf.Lerp(0.2f, 1.7f, Mathf.SmoothStep(0f, 1f, u));
+            yield return null;
+        }
+
+        Destroy(flash);
+    }
+
+    private static Sprite TeleportFlashSprite()
+    {
+        if (_teleportFlashSprite != null)
+            return _teleportFlashSprite;
+
+        const int size = 64;
+        var texture = new Texture2D(size, size, TextureFormat.RGBA32, false);
+        texture.hideFlags = HideFlags.HideAndDontSave;
+        var pixels = new Color32[size * size];
+        var center = (size - 1) * 0.5f;
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                float distance = Vector2.Distance(new Vector2(x, y), new Vector2(center, center)) / center;
+                float alpha = Mathf.Clamp01(1f - distance);
+                alpha *= alpha;
+                pixels[y * size + x] = new Color(1f, 1f, 1f, alpha);
+            }
+        }
+
+        texture.SetPixels32(pixels);
+        texture.Apply();
+        _teleportFlashSprite = Sprite.Create(
+            texture,
+            new Rect(0f, 0f, size, size),
+            new Vector2(0.5f, 0.5f),
+            size);
+        _teleportFlashSprite.hideFlags = HideFlags.HideAndDontSave;
+        return _teleportFlashSprite;
     }
 
     private void SetStageButtonsInputEnabled(bool enabled)

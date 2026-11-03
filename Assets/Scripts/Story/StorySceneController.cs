@@ -61,6 +61,8 @@ public class StorySceneController : MonoBehaviour
 
         dialogueManager.onDialogueFinished.AddListener(OnDialogueComplete);
         dialogueManager.OnCustomEvent += HandleDialogueEvent;
+        dialogueManager.SetImmediateSkip(true);
+        dialogueManager.SetHideNarrationSpeakerName(true);
 
         if (dialogueManager.GetComponent<DialogueBookChoiceController>() == null)
             dialogueManager.gameObject.AddComponent<DialogueBookChoiceController>();

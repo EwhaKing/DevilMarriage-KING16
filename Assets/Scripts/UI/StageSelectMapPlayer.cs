@@ -302,6 +302,15 @@ public class StageSelectMapPlayer : MonoBehaviour
         Face(destinationX - _rect.position.x);
     }
 
+    public void FaceTowardWorldX(float worldX)
+    {
+        CacheComponents();
+        if (_rect == null)
+            return;
+
+        Face(worldX - _rect.position.x);
+    }
+
     private void Face(float directionX)
     {
         if (Mathf.Abs(directionX) < 0.001f || _rect == null)
