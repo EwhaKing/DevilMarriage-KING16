@@ -1,5 +1,6 @@
 public static class SceneNames
 {
+    public const string Band = "BandScene";
     public const string Title = "TitleScene";
     public const string Prologue = "PrologueScene";
     public const string StageSelect = "StageSelectScene";
@@ -10,3 +11,4 @@ public static class SceneNames
     public const string Collection = "CollectionScene";
     public const string DevilPage = "DevilPageScene";
 }
+
