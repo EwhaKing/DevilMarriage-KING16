@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -300,6 +300,14 @@ public class StageSelectMapPlayer : MonoBehaviour
         }
 
         Face(destinationX - _rect.position.x);
+    }
+
+    public void FaceTowardWorldPosition(Vector3 destination)
+    {
+        if (_rect == null)
+            CacheComponents();
+        if (_rect != null)
+            Face(destination.x - _rect.position.x);
     }
 
     private void Face(float directionX)

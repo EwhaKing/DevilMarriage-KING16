@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -517,6 +517,10 @@ public class StageSelectController : MonoBehaviour
 
         if (!StageProgressManager.IsStageUnlocked(stageNumber))
             return;
+
+        var clickedButton = FindStageButton(stageNumber);
+        if (_mapPlayer != null && clickedButton != null)
+            _mapPlayer.FaceTowardWorldPosition(clickedButton.position);
 
         int current = StageProgressManager.CurrentMapStage;
         if (stageNumber != current)

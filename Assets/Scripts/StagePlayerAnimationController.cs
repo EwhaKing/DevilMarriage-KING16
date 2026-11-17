@@ -1,9 +1,10 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 [RequireComponent(typeof(Animator))]
 public class StagePlayerAnimationController : MonoBehaviour
 {
     private Animator _animator;
+    private SpriteRenderer _spriteRenderer;
 
     private static readonly int IsMovingHash =
         Animator.StringToHash("IsMoving");
@@ -17,6 +18,34 @@ public class StagePlayerAnimationController : MonoBehaviour
     private void Awake()
     {
         _animator = GetComponent<Animator>();
+        _spriteRenderer = GetComponent<SpriteRenderer>();
+    }
+
+    // The shared character artwork faces left by default. Flip only the visual,
+    // preserving the player transform, colliders and movement coordinates.
+    public void FaceTowardWorldPosition(Vector3 target)
+    {
+        FaceHorizontal(target.x - transform.position.x);
+    }
+
+    public void FaceTowardScreenPosition(Vector2 pointer, Camera viewCamera)
+    {
+        if (viewCamera == null || !viewCamera.pixelRect.Contains(pointer))
+            return;
+        Vector3 screenPosition = viewCamera.WorldToScreenPoint(transform.position);
+        if (screenPosition.z <= 0f)
+            return;
+        FaceHorizontal(pointer.x - screenPosition.x);
+    }
+
+    private void FaceHorizontal(float horizontalOffset)
+    {
+        if (Mathf.Abs(horizontalOffset) < 0.001f)
+            return;
+        if (_spriteRenderer == null)
+            _spriteRenderer = GetComponent<SpriteRenderer>();
+        if (_spriteRenderer != null)
+            _spriteRenderer.flipX = horizontalOffset > 0f;
     }
 
     public void SetMoving(bool isMoving)

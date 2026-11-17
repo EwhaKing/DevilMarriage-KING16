@@ -1,8 +1,12 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.EventSystems;
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
 
 public enum MoveFailReason
 {
@@ -73,6 +77,36 @@ public class Stage1PuzzleController : MonoBehaviour
     private void Start()
     {
         InitializeStage();
+    }
+
+    private void Update()
+    {
+        if (InputLocked || AwaitingStartSelection || _isMoving || _stageCleared ||
+            player == null || !player.gameObject.activeInHierarchy || playerAnimation == null ||
+            (resourceManager != null && resourceManager.IsGameOver))
+            return;
+
+        Vector2 pointer;
+#if ENABLE_INPUT_SYSTEM
+        var mouse = Mouse.current;
+        if (mouse == null || !mouse.leftButton.wasPressedThisFrame)
+            return;
+        pointer = mouse.position.ReadValue();
+#elif ENABLE_LEGACY_INPUT_MANAGER
+        if (!Input.GetMouseButtonDown(0))
+            return;
+        pointer = Input.mousePosition;
+#else
+        return;
+#endif
+        if (EventSystem.current != null)
+        {
+            var hits = new List<RaycastResult>();
+            EventSystem.current.RaycastAll(new PointerEventData(EventSystem.current) { position = pointer }, hits);
+            if (hits.Exists(hit => hit.gameObject.GetComponentInParent<Canvas>() != null))
+                return;
+        }
+        playerAnimation.FaceTowardScreenPosition(pointer, Camera.main);
     }
 
     /// <summary>
@@ -300,6 +334,13 @@ public class Stage1PuzzleController : MonoBehaviour
     {
         if (InputLocked || target == null)
             return;
+
+        // OnMouseDown can begin movement before Update sees the pointer press.
+        // Face the chosen rune before movement or teleportation changes position.
+        if (!_isMoving && !_stageCleared && !AwaitingStartSelection &&
+            player != null && player.gameObject.activeInHierarchy && playerAnimation != null &&
+            (resourceManager == null || !resourceManager.IsGameOver))
+            playerAnimation.FaceTowardWorldPosition(target.WorldPosition);
 
         if (AwaitingStartSelection)
         {
