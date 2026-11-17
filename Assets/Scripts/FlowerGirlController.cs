@@ -6,19 +6,38 @@ public class FlowerGirlController : MonoBehaviour
     [Header("화동 이동 설정")]
     public float runSpeed = 4f;
 
-    // 게임 진행 여부
-    public bool isRunning = true;
+    public bool isRunning = false;
 
     private Rigidbody2D rb;
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        isRunning = false;
+    }
+
+    public void StartRunning()
+    {
+        isRunning = true;
+    }
+
+    public void StopRunning()
+    {
+        isRunning = false;
+
+        if (rb != null)
+        {
+            rb.linearVelocity = new Vector2(
+                0f,
+                rb.linearVelocity.y
+            );
+        }
     }
 
     void FixedUpdate()
     {
-        // 게임이 끝났다면 이동 중지
+        if (rb == null) return;
+
         if (!isRunning)
         {
             rb.linearVelocity = new Vector2(
@@ -29,20 +48,8 @@ public class FlowerGirlController : MonoBehaviour
             return;
         }
 
-        // 일정한 속도로 오른쪽 이동
         rb.linearVelocity = new Vector2(
             runSpeed,
-            rb.linearVelocity.y
-        );
-    }
-
-    // 화동 이동 정지
-    public void StopRunning()
-    {
-        isRunning = false;
-
-        rb.linearVelocity = new Vector2(
-            0f,
             rb.linearVelocity.y
         );
     }
