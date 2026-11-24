@@ -442,8 +442,8 @@ public class StylistGameManager : MonoBehaviour
             "EquippedItems",
             characterPanel.transform,
             "",
-            new Vector2(0.05f, 0.04f),
-            new Vector2(0.95f, 0.34f),
+            new Vector2(0.05f, 0.01f),
+            new Vector2(0.95f, 0.20f),
             22,
             new Color(0.45f, 0.3f, 0.35f)
         );
