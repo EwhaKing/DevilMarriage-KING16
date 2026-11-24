@@ -5,6 +5,7 @@ using System.Collections.Generic;
 
 public class PlayerController : MonoBehaviour
 {
+    private Animator animator;
     [Header("달리기 설정")]
     public float currentSpeed = 0f;
     public float acceleration = 0.5f;
@@ -33,6 +34,13 @@ public class PlayerController : MonoBehaviour
 
     void Start()
     {
+        animator = GetComponent<Animator>();
+
+        if (animator != null)
+        {
+            animator.speed = 0f;
+        }
+
         rb = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
 
@@ -47,11 +55,21 @@ public class PlayerController : MonoBehaviour
 
     public void StartRunning()
     {
+        if (animator != null)
+        {
+            animator.speed = 1f;
+        }
+
         canControl = true;
     }
 
     public void StopRunning()
     {
+        if (animator != null)
+        {
+            animator.speed = 0f;
+        }
+
         canControl = false;
         currentSpeed = 0f;
 

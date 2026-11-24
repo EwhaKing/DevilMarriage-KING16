@@ -462,6 +462,7 @@ GameObject:
   - component: {fileID: 332259324}
   - component: {fileID: 332259323}
   - component: {fileID: 332259325}
+  - component: {fileID: 332259326}
   m_Layer: 0
   m_Name: FlowerGirl
   m_TagString: FlowerGirl
@@ -478,7 +479,7 @@ Transform:
   m_GameObject: {fileID: 332259320}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -100, y: -0.5, z: 0}
+  m_LocalPosition: {x: -100, y: -1.5, z: 0}
   m_LocalScale: {x: 0.8, y: 1.2, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -533,8 +534,8 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
-  m_Color: {r: 0.92156863, g: 0.39607847, b: 0.43204394, a: 1}
+  m_Sprite: {fileID: -1442032520, guid: 7a0c1953a9bb1f74da9e07b3315cea67, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -607,8 +608,8 @@ BoxCollider2D:
   m_Offset: {x: 0, y: 0}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
+    pivot: {x: 0.5, y: 0}
+    oldSize: {x: 2.57, y: 2.92}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -630,6 +631,28 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FlowerGirlController
   runSpeed: 4
   isRunning: 1
+--- !u!95 &332259326
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 332259320}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: aca93b67eafc4734daab8d233f4464a4, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &582266771
 GameObject:
   m_ObjectHideFlags: 0
@@ -1595,6 +1618,7 @@ GameObject:
   - component: {fileID: 1681578479}
   - component: {fileID: 1681578478}
   - component: {fileID: 1681578477}
+  - component: {fileID: 1681578480}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -1666,8 +1690,8 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
-  m_Color: {r: 0.39482468, g: 0.52984077, b: 0.9198113, a: 1}
+  m_Sprite: {fileID: -1382956131, guid: df1413b22efd8b444814ea577338390f, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -1762,7 +1786,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
+    oldSize: {x: 1.84, y: 2.26}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -1770,6 +1794,28 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
+--- !u!95 &1681578480
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1681578474}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 85c95d437e14fa6429aa0ddca04d7427, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &1684645289
 GameObject:
   m_ObjectHideFlags: 0
@@ -2379,12 +2425,20 @@ PrefabInstance:
     m_TransformParent: {fileID: 78249338}
     m_Modifications:
     - target: {fileID: 60494203318366065, guid: c7687d44591100145918b62dfe7b421d, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 60494203318366065, guid: c7687d44591100145918b62dfe7b421d, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 60494203318366065, guid: c7687d44591100145918b62dfe7b421d, type: 3}
       propertyPath: m_LocalPosition.x
       value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 60494203318366065, guid: c7687d44591100145918b62dfe7b421d, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -2.5
+      value: -4
       objectReference: {fileID: 0}
     - target: {fileID: 60494203318366065, guid: c7687d44591100145918b62dfe7b421d, type: 3}
       propertyPath: m_LocalPosition.z
@@ -2418,6 +2472,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7346160750913788611, guid: c7687d44591100145918b62dfe7b421d, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 2079447404, guid: d9a64d070e2ad0d4992520d66ca26faa, type: 3}
     - target: {fileID: 7415474716883194061, guid: c7687d44591100145918b62dfe7b421d, type: 3}
       propertyPath: m_Name
       value: Obstacle

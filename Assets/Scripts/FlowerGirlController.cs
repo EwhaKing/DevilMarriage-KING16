@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class FlowerGirlController : MonoBehaviour
 {
+    private Animator animator;
+
     [Header("화동 이동 설정")]
     public float runSpeed = 4f;
 
@@ -14,15 +16,31 @@ public class FlowerGirlController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         isRunning = false;
+        animator = GetComponent<Animator>();
+
+        if (animator != null)
+        {
+            animator.speed = 0f;
+        }
     }
 
     public void StartRunning()
     {
         isRunning = true;
+
+        if (animator != null)
+        {
+            animator.speed = 1f;
+        }
     }
 
     public void StopRunning()
     {
+        if (animator != null)
+        {
+            animator.speed = 0f;
+        }
+
         isRunning = false;
 
         if (rb != null)

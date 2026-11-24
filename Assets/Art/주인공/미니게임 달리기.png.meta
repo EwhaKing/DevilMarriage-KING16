@@ -1,10 +1,13 @@
 fileFormatVersion: 2
-guid: 3f22dd4a27f6f9546a5fbf0e598888a8
+guid: df1413b22efd8b444814ea577338390f
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 4130057855552876361
-    second: "\uB2EC\uB9AC\uAE302_0"
+      213: 3310002292416464744
+    second: image-removebg-preview_0
+  - first:
+      213: 3465280639480317682
+    second: image-removebg-preview_1
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,23 +116,45 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: "\uB2EC\uB9AC\uAE302_0"
+      name: "\uBBF8\uB2C8\uAC8C\uC784 \uB2EC\uB9AC\uAE30_0"
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 237
-        height: 302
+        x: 87
+        y: 57
+        width: 184
+        height: 226
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 94f6a06dcb9e05930800000000000000
-      internalID: 4130057855552876361
+      spriteID: 4d120bf598ce716428f85a2d2f04c6c5
+      internalID: -1382956131
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "\uBBF8\uB2C8\uAC8C\uC784 \uB2EC\uB9AC\uAE30_1"
+      rect:
+        serializedVersion: 2
+        x: 412
+        y: 51
+        width: 192
+        height: 231
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fea24907c9bd32545812bcaeebb52768
+      internalID: -1003254016
       vertices: []
       indices: 
       edges: []
@@ -138,7 +163,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 6f1968c43b272e245b04cb880a174d6b
     internalID: 0
     vertices: []
     indices: 
@@ -146,9 +171,12 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
-      entries: []
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":64.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":0,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
-      "\uB2EC\uB9AC\uAE302_0": 4130057855552876361
+      "\uBBF8\uB2C8\uAC8C\uC784 \uB2EC\uB9AC\uAE30_0": -1382956131
+      "\uBBF8\uB2C8\uAC8C\uC784 \uB2EC\uB9AC\uAE30_1": -1003254016
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

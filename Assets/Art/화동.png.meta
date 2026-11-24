@@ -1,10 +1,13 @@
 fileFormatVersion: 2
-guid: f3b3605b24cce984ca44cbe8ebc1c9b3
+guid: 7a0c1953a9bb1f74da9e07b3315cea67
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -5584979563161730960
-    second: "\uB2EC\uB9AC\uAE301_0"
+      213: 8513229126007580200
+    second: KakaoTalk_20261117_212849734-removebg-preview_0
+  - first:
+      213: 2115350354548050442
+    second: KakaoTalk_20261117_212849734-removebg-preview_1
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -37,7 +40,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -113,23 +116,45 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: "\uB2EC\uB9AC\uAE301_0"
+      name: "\uD654\uB3D9_0"
       rect:
         serializedVersion: 2
-        x: 0
+        x: 163
         y: 0
-        width: 228
-        height: 302
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        width: 257
+        height: 292
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 167, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a296c37f5127da54ab13725e5c1c6808
+      internalID: -143315848
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "\uD654\uB3D9_1"
+      rect:
+        serializedVersion: 2
+        x: 427
+        y: 0
+        width: 257
+        height: 292
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 070cde38daa2e72b0800000000000000
-      internalID: -5584979563161730960
+      spriteID: 8f45124515bd70b48b7acd33159c30d9
+      internalID: -1442032520
       vertices: []
       indices: 
       edges: []
@@ -138,7 +163,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: c979c0333f0c47d49878b536889d6d90
     internalID: 0
     vertices: []
     indices: 
@@ -146,9 +171,14 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
-      entries: []
+      entries:
+      - key: SpriteEditor.SliceOnImport
+        value: False
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":2.0,"y":1.0},"gridSpriteSize":{"x":427.0,"y":292.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.0},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":7,"pivotUnitMode":0,"slicingType":2,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
-      "\uB2EC\uB9AC\uAE301_0": -5584979563161730960
+      "\uD654\uB3D9_0": -143315848
+      "\uD654\uB3D9_1": -1442032520
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
